@@ -11,3 +11,6 @@ class Player:
             return False
         self.nickname = nickname
         return True
+    
+    def getNickname(self):
+        return self.nickname
