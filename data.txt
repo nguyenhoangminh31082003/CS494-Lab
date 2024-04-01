@@ -1,0 +1,6 @@
+5
+apple:fruit
+banana:fruit
+carrot:vegetable
+dog:animal
+elephant:animal
