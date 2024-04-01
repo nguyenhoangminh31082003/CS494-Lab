@@ -96,7 +96,8 @@ def handle_client(connection_socket, addr):
     while True:
         t = receive(lambda msg: handle_register(msg))
         if not t:
-            break 
+            break
+        print(t)
     print(f"[{addr}]: mibang")
     connected = True
     try:
