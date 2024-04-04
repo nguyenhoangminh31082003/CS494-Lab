@@ -1,46 +1,35 @@
 import sys
 import random
-sys.path.append("../")
-from Server.ClientModel import ClientModel
+import json
+import os
 
-class Quiz:
-    def __init__(self, question, keyword):
-        self.question = question.strip()
-        self.keyword = keyword.strip().upper()
-        self.encoded = "*" * len(keyword)
-    
-    def guessLetter(self, letter) -> bool:
-        if letter.strip().upper() in self.keyword:
-            self.updateEncoded(letter)
-            return True
-        else:
-            return False
-    
-    def guessKeyword(self, keyword) -> bool:
-        if keyword.strip().upper() == self.keyword:
-            self.encoded = self.keyword
-            return True
-        else:
-            return False
-    
-    def updateEncoded(self, letter) -> None:
-        raise NotImplementedError
-    
-    def getQuestion(self) -> str:
-        raise NotImplementedError
+from Server.ClientModel import ClientModel
+from Server.Quiz import Quiz
 
 class GameModel:
+    
     def __init__(self) -> None:
         self.quizzes = []
         self.readQuizzes()
         self.round = 0
         self.people = []
-        self.alive_players = 0
+        self.number_of_alive_players = 0
         self.current_player = 0
         self.current_quiz = None
         self.timeout = 20
         self.is_game_on = False
         
+    @staticmethod
+    def getStoredGameInformation(self):
+        if not os.path.exists("./Data/game_information.json"):
+            return {
+                "required_number_of_players": 10
+            }
+        
+        with open("./Data/game_information.json", "r") as file:
+            return json.load(file)
+
+
     def readQuizzes(self) -> None:
         with open("data.txt", "r") as file:
             number_of_words = int(file.readline())
@@ -53,7 +42,7 @@ class GameModel:
     
     def addPlayer(self, player: ClientModel) -> None:
         self.people.append(player)
-        alive_players += 1
+        number_of_number_of_alive_players += 1
     
     def handleGuess(self, guess: str, is_final_guess: bool) -> None:
         if is_final_guess:
@@ -66,7 +55,7 @@ class GameModel:
                 self.people[self.current_player].correctAnswerLetter()
             else:
                 self.people[self.current_player].wrongAnswerKeyword()
-                self.alive_players -= 1
+                self.number_of_alive_players -= 1
                 self.findNextPlayer()
             
     def findNextPlayer(self) -> None:
@@ -83,11 +72,14 @@ class GameModel:
         raise NotImplementedError
     
     def startNewGame(self) -> None:
-        alive_players = len(self.people)
+        number_of_alive_players = len(self.people)
         self.round = 0
         self.chooseQuiz()
         self.current_player = 0
-        for i in range(alive_players):
+        for i in range(number_of_alive_players):
             self.people[i].reset()
         self.is_game_on = True
             
+    def run(self):
+        pass
+    

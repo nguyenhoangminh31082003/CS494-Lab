@@ -1,10 +1,11 @@
 import re
 import sys
-sys.path.append("../")
+
 from Server.Score import * 
 from Server.Mode import Mode
 
 class ClientModel:
+
     def __init__(self, connection, address):
         self.connection = connection
         self.address = address

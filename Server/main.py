@@ -1,9 +1,7 @@
 import sys
-sys.path.append("../")
 
-
-import Server
+from Server.ServerModel import ServerModel
 
 if __name__ == "__main__":
-    server = Server.Server()
-    server.receiveClientRequestForConnection()
+    game = ServerModel()
+    game.run()
