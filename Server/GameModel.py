@@ -3,7 +3,7 @@ import random
 import json
 import os
 
-from Server.PlayerModel import PlayerModel
+from Server.ParticipantModel import ParticipantModel
 from Server.Quiz import Quiz
 
 class GameModel:
@@ -13,6 +13,7 @@ class GameModel:
         self.readQuizzes()
         self.roundCount = 0
         self.players = []
+        self.watchers = []
         self.alivePlayerCount = 0
         self.currentPlayerID = 0
         self.currentQuizID = None
@@ -50,9 +51,12 @@ class GameModel:
     def chooseQuiz(self) -> None:
         self.currentQuizID = random.choice(self.quizzes)
     
-    def addPlayer(self, player: PlayerModel) -> None:
+    def addPlayer(self, player: ParticipantModel) -> None:
         self.players.append(player)
         self.alivePlayerCount += 1
+
+    def addWatcher(self, watcher: ParticipantModel) -> None:
+        self.watchers.append(watcher)
     
     def handleGuess(self, guess: str, is_final_guess: bool) -> None:
         if is_final_guess:
@@ -95,3 +99,9 @@ class GameModel:
     
     def checkGameOn(self) -> bool:
         return self.isGameOn
+    
+    def broadcastMessage(self, message: str) -> None:
+        for player in self.players:
+            player.addMessageToBeSent(message)
+        for watcher in self.watchers:
+            watcher.addMessageToBeSent(message)

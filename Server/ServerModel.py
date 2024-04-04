@@ -5,7 +5,8 @@ import socket
 import json
 import os
 
-import Server.GameModel as GameModel
+from Server.GameModel import GameModel
+from Server.ParticipantModel import ParticipantModel
 
 class ServerModel:
 
@@ -57,7 +58,34 @@ class ServerModel:
         connection, address = key.fileobj.accept()
         
         if self.game.haveEnoughPlayers():
+            #connection.sendall("Sorry, the game is full. You can only watch the game".encode(self.rules["format"]))
+            watcher = ParticipantModel(connection, address)
+            watcher.becomeWatcher()
+
+            watcher.addMessageToBeSent("Sorry, the game is full. You can only watch the game")
+
+            self.game.addWatcher(watcher)
+
+            self.selector.register(connection, selectors.EVENT_READ | selectors.EVENT_WRITE, data = watcher)
             return
+        
+        player = ParticipantModel(connection, address)
+
+        self.game.addPlayer(player)
+
+        self.selector.register(connection, selectors.EVENT_READ | selectors.EVENT_WRITE, data = player)
+
+        self.game.broadcastMessage(f"Player with address {player.address} has joined the game")
+
+    def serveConnection(self, key, mask):
+        participantSocket = key.fileobj
+        participant = key.data
+
+        if (mask & selectors.EVENT_READ):
+            receivedData = participantSocket.recv(1024)
+
+        if (mask & selectors.EVENT_WRITE):
+            participant.sendMessageWithGivenSocket(participantSocket)
 
     def listen(self):
 
@@ -69,7 +97,7 @@ class ServerModel:
                 if key.data is None:
                     self.handleConnectionRequest(key, mask)   
                 else:
-                    #self.handleConnection(key, mask)
+                    self.serveConnection(key, mask)
                     pass
 
     def run(self):

@@ -1,10 +1,11 @@
 import re
 import sys
+import queue
 
 from Server.Score import * 
 from Server.Mode import Mode
 
-class PlayerModel:
+class ParticipantModel:
 
     def __init__(self, connection, address):
         self.connection = connection
@@ -12,6 +13,7 @@ class PlayerModel:
         self.score = 0
         self.nickname = None
         self.mode = Mode.WATCH
+        self.messagesToBeSent = queue.Queue()
 
     @staticmethod
     def checkNicknameValid(nickname: str) -> bool:
@@ -40,3 +42,25 @@ class PlayerModel:
     def wrongAnswerKeyword(self):
         self.mode = Mode.DIE
         
+    def becomeWatcher(self) -> None:
+        self.mode = Mode.WATCH
+
+    def getMessageToBeSent(self):
+        if not self.messagesToBeSent.empty():
+            return self.messagesToBeSent.get()
+        return None
+    
+    def addMessageToBeSent(self, message):
+        self.messagesToBeSent.put(message)
+
+    def sendMessageWithGivenSocket(self, socket) -> bool:
+
+        if not self.messagesToBeSent.empty():
+            message = self.messagesToBeSent.get()
+            try:
+                socket.sendall(message.encode("utf-8"))
+            except:
+                return False
+            return True
+
+        return False
