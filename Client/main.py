@@ -1,11 +1,5 @@
-import sys
-sys.path.append("../")
-sys.path.append("./Server/")
-
-import Client
-import Server
+import Client.ClientModel as ClientModel
 
 if __name__ == "__main__":
-    client = Client.Client(Server.Server.getAddress())
-
+    client = ClientModel.Client({"host": "127.0.0.1", "port": 12000})
     client.run()

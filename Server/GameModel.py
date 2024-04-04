@@ -3,7 +3,7 @@ import random
 import json
 import os
 
-from Server.ClientModel import ClientModel
+from Server.PlayerModel import PlayerModel
 from Server.Quiz import Quiz
 
 class GameModel:
@@ -11,13 +11,24 @@ class GameModel:
     def __init__(self) -> None:
         self.quizzes = []
         self.readQuizzes()
-        self.round = 0
-        self.people = []
-        self.number_of_alive_players = 0
-        self.current_player = 0
-        self.current_quiz = None
+        self.roundCount = 0
+        self.players = []
+        self.alivePlayerCount = 0
+        self.currentPlayerID = 0
+        self.currentQuizID = None
         self.timeout = 20
-        self.is_game_on = False
+        self.isGameOn = False
+        self.requiredPlayerCount = self.getStoredGameInformation()["required_number_of_players"]
+
+    def haveEnoughPlayers(self) -> bool:
+        return len(self.players) >= self.requiredPlayerCount
+
+    def setPlayerCountRequirement(self, count: int) -> bool:
+        if count < 2 or count > 10:
+            return False
+        self.requiredPlayerCount = count
+        self.saveGameInformation()
+        return True
         
     @staticmethod
     def getStoredGameInformation(self):
@@ -29,57 +40,58 @@ class GameModel:
         with open("./Data/game_information.json", "r") as file:
             return json.load(file)
 
-
     def readQuizzes(self) -> None:
         with open("data.txt", "r") as file:
-            number_of_words = int(file.readline())
-            for _ in range(number_of_words):
+            wordCount = int(file.readline())
+            for _ in range(wordCount):
                 tmp = file.readline().split(":")
                 self.quizzes.append(Quiz(tmp[0], tmp[1]))
     
     def chooseQuiz(self) -> None:
-        self.current_quiz = random.choice(self.quizzes)
+        self.currentQuizID = random.choice(self.quizzes)
     
-    def addPlayer(self, player: ClientModel) -> None:
-        self.people.append(player)
-        number_of_number_of_alive_players += 1
+    def addPlayer(self, player: PlayerModel) -> None:
+        self.players.append(player)
+        self.alivePlayerCount += 1
     
     def handleGuess(self, guess: str, is_final_guess: bool) -> None:
         if is_final_guess:
-            if self.current_quiz.guessKeyword(guess):
-                self.people[self.current_player].correctAnswerKeyword()
+            if self.currentQuizID.guessKeyword(guess):
+                self.players[self.currentPlayerID].correctAnswerKeyword()
             else:
                 self.findNextPlayer()
         else:
-            if self.current_quiz.guessLetter(guess):
-                self.people[self.current_player].correctAnswerLetter()
+            if self.currentQuizID.guessLetter(guess):
+                self.players[self.currentPlayerID].correctAnswerLetter()
             else:
-                self.people[self.current_player].wrongAnswerKeyword()
-                self.number_of_alive_players -= 1
+                self.players[self.currentPlayerID].wrongAnswerKeyword()
+                self.alivePlayerCount -= 1
                 self.findNextPlayer()
             
     def findNextPlayer(self) -> None:
-        # next player with mode PLAY in "people"
+        # next player with mode PLAY in "players"
         raise NotImplementedError
     
     def getClientIndex(self, address) -> int:
-        # find player in "people" by address and return the index
+        # find player in "players" by address and return the index
         raise NotImplementedError 
     
     def summary(self) -> None:
         # print only player with mode DIE and PLAY
-        self.is_game_on = False
+        self.isGameOn = False
         raise NotImplementedError
     
     def startNewGame(self) -> None:
-        number_of_alive_players = len(self.people)
-        self.round = 0
+        alivePlayerCount = len(self.players)
+        self.roundCount = 0
         self.chooseQuiz()
-        self.current_player = 0
-        for i in range(number_of_alive_players):
-            self.people[i].reset()
-        self.is_game_on = True
-            
-    def run(self):
-        pass
+        self.currentPlayerID = 0
+        for i in range(alivePlayerCount):
+            self.players[i].reset()
+        self.isGameOn = True
     
+    def getRoundCount(self) -> int:
+        return self.roundCount
+    
+    def checkGameOn(self) -> bool:
+        return self.isGameOn

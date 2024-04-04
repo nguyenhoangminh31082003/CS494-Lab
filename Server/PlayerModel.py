@@ -4,7 +4,7 @@ import sys
 from Server.Score import * 
 from Server.Mode import Mode
 
-class ClientModel:
+class PlayerModel:
 
     def __init__(self, connection, address):
         self.connection = connection
@@ -13,14 +13,18 @@ class ClientModel:
         self.nickname = None
         self.mode = Mode.WATCH
 
-    def setNickname(self, nickname: str) -> bool:
+    @staticmethod
+    def checkNicknameValid(nickname: str) -> bool:
         length = len(nickname)
-        if (length <= 0) or (length > 10) or (not re.match("^[a-zA-Z0-9_]*$", nickname)):
-            return False
-        self.nickname = nickname
-        return True
+        return (1 <= length) and (length <= 10) and re.match("^[a-zA-Z0-9_]*$", nickname)
+
+    def setNickname(self, nickname: str) -> bool:
+        if self.checkNicknameValid(nickname):
+            self.nickname = nickname
+            return True
+        return False
     
-    def getNickname(self):
+    def getNickname(self) -> str:
         return self.nickname
     
     def reset(self):

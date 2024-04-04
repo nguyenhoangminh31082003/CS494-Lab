@@ -6,14 +6,14 @@ import json
 import os
 
 import Server.GameModel as GameModel
-import Server.ClientModel as ClientModel
 
 class ServerModel:
+
     def __init__(self):
         self.listeningSocket = None
         self.selector = None
         self.rules = self.getStoredServerInformation()
-        self.game = None
+        self.game = GameModel()
         self.isRunning = False
 
     @staticmethod
@@ -45,7 +45,57 @@ class ServerModel:
 
         return True
 
+    def closeConnections(self):
+        self.listeningSocket.close()
+        self.selector.unregister(self.listeningSocket)
+
+
+
+        self.selector.close()
+
+    def handleConnectionRequest(self, key, mask):
+        connection, address = key.fileobj.accept()
+        
+        if self.game.haveEnoughPlayers():
+            return
+
+    def listen(self):
+
+        while self.isRunning:
+
+            events = self.selector.select(timeout=None)
+
+            for key, mask in events:
+                if key.data is None:
+                    self.handleConnectionRequest(key, mask)   
+                else:
+                    #self.handleConnection(key, mask)
+                    pass
+
     def run(self):
-        self.createListeningSocketAndSelector()
 
         self.isRunning = True
+
+        while True:
+
+            N = 0
+
+            while True:
+                N = int(input("Enter the number of players (between 2 and 10): "))
+                if (N < 2) or (N > 10):
+                    print("Invalid number of players. Please try again.")            
+                else:
+                    break
+
+            self.createListeningSocketAndSelector()
+
+            self.game.setPlayerCountRequirement(N)
+
+
+
+            N = input("Do you want to start the another game? Please type 'Yes' in any case if you want to start the another game: ")
+            if N.lower() != "yes":
+                print("See you later")
+                break
+
+        self.isRunning = False
