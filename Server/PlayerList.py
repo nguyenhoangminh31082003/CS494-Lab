@@ -10,6 +10,7 @@ class PlayerList:
     def __init__(self):
         self.players = []
         self.countAlivePlayers = 0
+        self.currentID = 0
 
     def __getitem__(self, key : int) -> ParticipantModel:   
         return self.players[key]
@@ -31,11 +32,22 @@ class PlayerList:
     def countAlivePlayers(self) -> int:
         return self.countAlivePlayers
     
-    def findPlayerWithGivenNickanme(self, nickname : str):
-        for player in self.players:
+    def findPlayerPosition(self, nickname : str) -> int:
+        for i, player in enumerate(self.players):
             if player.getNickname() == nickname:
-                return player
-        return None
+                return i
+        return -1
     
     def checkNicknameExist(self, nickname : str) -> bool:
-        return self.findPlayerWithGivenNickanme(nickname) is not None
+        return self.findPlayerPosition(nickname) >= 0
+
+    def getFormattedSummary(self) -> str:
+        resultLines = [
+            f"Current player: {self.players[self.currentID].getNickname()}",
+            f"{"order".rjust(10)}| {"nickname".ljust(10)}| {"points".rjust(10)}"
+        ]
+        
+        for i, player in enumerate(self.players):
+            resultLines.append(f"{str(i).rjust(10)}| {player.getNickname().ljust(10)}| {str(player.score).rjust(10)}")
+
+        return "\n".join(resultLines)

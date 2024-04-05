@@ -3,6 +3,9 @@ import random
 import json
 import os
 
+import sys
+sys.path.append("./Quizzes/")
+
 from ParticipantModel import ParticipantModel
 from Quiz import Quiz
 from QuizList import QuizList
@@ -17,32 +20,32 @@ class GameModel:
         self.roundCount = 0
         self.players = PlayerList()
         self.watchers = []
-        self.currentPlayerID = 0
         self.timeout = 20
         self.isGameOn = False
-        self.requiredPlayerCount = self.getStoredGameInformation()["required_number_of_players"]
+
+        self.rules = self.getStoredGameInformation()
 
     def haveEnoughPlayers(self) -> bool:
-        return len(self.players) >= self.requiredPlayerCount
+        return len(self.players) >= self.rules["required_number_of_players"]
 
     def setPlayerCountRequirement(self, count: int) -> bool:
         if (count < 2) or (count > 10):
             return False
-        self.requiredPlayerCount = count
+        self.rules["required_number_of_players"] = count
         self.saveGameInformation()
         return True
     
     def saveGameInformation(self) -> None:
         with open("./Data/game_information.json", "w") as file:
-            json.dump({
-                "required_number_of_players": self.requiredPlayerCount
-            }, file)
+            json.dump(self.rules, file)
         
     @staticmethod
     def getStoredGameInformation():
         if not os.path.exists("./Data/game_information.json"):
             return {
-                "required_number_of_players": 10
+                "required_number_of_players": 5,
+                "number_of_points_granted_for_correct_guess": 1,
+                "number_of_points_granted_for_correct_keyword": 5
             }
         
         with open("./Data/game_information.json", "r") as file:
@@ -67,14 +70,6 @@ class GameModel:
                 self.players[self.currentPlayerID].wrongAnswerKeyword()
                 self.alivePlayerCount -= 1
                 self.findNextPlayer()
-            
-    def findNextPlayer(self) -> None:
-        # next player with mode PLAY in "players"
-        raise NotImplementedError
-    
-    def getClientIndex(self, address) -> int:
-        # find player in "players" by address and return the index
-        raise NotImplementedError 
     
     def summary(self) -> None:
         # print only player with mode DIE and PLAY
@@ -102,5 +97,8 @@ class GameModel:
         for watcher in self.watchers:
             watcher.addResponse(message)
 
-    def containsPlayerWithNickname(self, nickname: str) -> bool:
+    def containsPlayer(self, nickname: str) -> bool:
         return self.players.checkNicknameExist(nickname)
+    
+    def findPlayerPosition(self, nickname: str) -> int:
+        return self.players.findPlayerPosition(nickname)

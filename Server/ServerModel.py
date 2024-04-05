@@ -112,7 +112,7 @@ class ServerModel:
             print(f"[SERVER] Player with address {participant.address} has entered an invalid nickname ({nickname})")
             return False
 
-        if self.game.containsPlayerWithNickname(nickname):
+        if self.game.containsPlayer(nickname):
             participant.addResponse(Response(
                 statusCode=ResponseStatusCode.NICKNAME_ALREADY_TAKEN,
                 content="Nickname already taken. Please try again"
@@ -124,7 +124,7 @@ class ServerModel:
 
         participant.addResponse(Response(
             statusCode=ResponseStatusCode.NICKNAME_ACCEPTED,
-            content="Nickname accepted. Please wait the game to start"
+            content= f"Registration Completed Successfully. You will have {self.game.findPlayerPosition(nickname)}-th turn in the game"
         ))
 
         self.game.broadcastResponse(Response(

@@ -5,7 +5,6 @@ import queue
 import sys
 sys.path.append("./Message/")
 
-from Score import * 
 from Mode import Mode
 from Response import Response
 
@@ -18,6 +17,9 @@ class ParticipantModel:
         self.nickname = None
         self.mode = Mode.WATCH
         self.responses = queue.Queue()
+
+    def __str__(self):
+        return f"ParticipantModel({self.nickname}, {self.address})"
 
     @staticmethod
     def checkNicknameValid(nickname: str) -> bool:
@@ -37,11 +39,8 @@ class ParticipantModel:
         self.score = 0
         self.mode = Mode.PLAY
         
-    def correctAnswerLetter(self):
-        self.score += LETTER_SCORE
-        
-    def correctAnswerKeyword(self):
-        self.score += KEYWORD_SCORE
+    def increaseScore(self, score : int):
+        self.score += score
         
     def wrongAnswerKeyword(self):
         self.mode = Mode.DIE
@@ -68,6 +67,7 @@ class ParticipantModel:
                 socket.sendall(message)
             except:
                 return False
+            
             return True
 
         return False
