@@ -3,20 +3,19 @@ import random
 import json
 import os
 
-from Server.ParticipantModel import ParticipantModel
-from Server.Quiz import Quiz
+from ParticipantModel import ParticipantModel
+from Quiz import Quiz
+from QuizList import QuizList
 
 class GameModel:
     
     def __init__(self) -> None:
-        self.quizzes = []
-        self.readQuizzes()
+        self.quizList = QuizList()
         self.roundCount = 0
         self.players = []
         self.watchers = []
         self.alivePlayerCount = 0
         self.currentPlayerID = 0
-        self.currentQuizID = None
         self.timeout = 20
         self.isGameOn = False
         self.requiredPlayerCount = self.getStoredGameInformation()["required_number_of_players"]
@@ -30,9 +29,15 @@ class GameModel:
         self.requiredPlayerCount = count
         self.saveGameInformation()
         return True
+    
+    def saveGameInformation(self) -> None:
+        with open("./Data/game_information.json", "w") as file:
+            json.dump({
+                "required_number_of_players": self.requiredPlayerCount
+            }, file)
         
     @staticmethod
-    def getStoredGameInformation(self):
+    def getStoredGameInformation():
         if not os.path.exists("./Data/game_information.json"):
             return {
                 "required_number_of_players": 10
@@ -40,17 +45,7 @@ class GameModel:
         
         with open("./Data/game_information.json", "r") as file:
             return json.load(file)
-
-    def readQuizzes(self) -> None:
-        with open("data.txt", "r") as file:
-            wordCount = int(file.readline())
-            for _ in range(wordCount):
-                tmp = file.readline().split(":")
-                self.quizzes.append(Quiz(tmp[0], tmp[1]))
-    
-    def chooseQuiz(self) -> None:
-        self.currentQuizID = random.choice(self.quizzes)
-    
+        
     def addPlayer(self, player: ParticipantModel) -> None:
         self.players.append(player)
         self.alivePlayerCount += 1
@@ -88,7 +83,7 @@ class GameModel:
     def startNewGame(self) -> None:
         alivePlayerCount = len(self.players)
         self.roundCount = 0
-        self.chooseQuiz()
+        self.setIndexToRandomQuiz()
         self.currentPlayerID = 0
         for i in range(alivePlayerCount):
             self.players[i].reset()

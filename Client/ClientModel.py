@@ -4,11 +4,14 @@ import socket
 import sys
 sys.path.append("../")
 
-class Client:
-    def __init__(self, address: dict):
-        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client.connect((address["host"], int(address["port"])))
+class ClientModel:
+    def __init__(self):
+        self.clientSocket = None
         
+    def connectToServer(self, host : str, port : int) -> None:
+        self.clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.clientSocket.connect((host, port))
+
     # def handleAnIteration(self):
     #     message = self.client.recv(1024).decode()
     #     if message == "Please enter your nickname: ":
@@ -16,9 +19,10 @@ class Client:
     #         self.client.send(nickname.encode())
     #         return
 
-    # def run(self):
-    #     thread = threading.Thread(target=self.handleAnIteration)
-    #     thread.start()
+    def run(self):
+        #thread = threading.Thread(target=self.handleAnIteration)
+        #thread.start()
+        pass
     
     def registration(self):
         raise NotImplementedError

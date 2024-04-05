@@ -1,5 +1,14 @@
-import Client.ClientModel as ClientModel
+import sys
+
+sys.path.append("./Server/")
+
+from ClientModel import ClientModel
+from ServerModel import ServerModel
 
 if __name__ == "__main__":
-    client = ClientModel.Client({"host": "127.0.0.1", "port": 12000})
+
+    serverAddress = ServerModel.getStoredServerInformation()
+
+    client = ClientModel()
+    client.connectToServer(serverAddress["host"], serverAddress["port"])
     client.run()

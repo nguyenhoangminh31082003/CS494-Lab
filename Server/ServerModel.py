@@ -1,12 +1,13 @@
 import threading
 import selectors
 import time
+import sys
 import socket
 import json
 import os
 
-from Server.GameModel import GameModel
-from Server.ParticipantModel import ParticipantModel
+from GameModel import GameModel
+from ParticipantModel import ParticipantModel
 
 class ServerModel:
 
@@ -55,10 +56,12 @@ class ServerModel:
         self.selector.close()
 
     def handleConnectionRequest(self, key, mask):
+
         connection, address = key.fileobj.accept()
         
+        print(f"[SERVER] New connection request from {address}")
+
         if self.game.haveEnoughPlayers():
-            #connection.sendall("Sorry, the game is full. You can only watch the game".encode(self.rules["format"]))
             watcher = ParticipantModel(connection, address)
             watcher.becomeWatcher()
 
@@ -67,6 +70,9 @@ class ServerModel:
             self.game.addWatcher(watcher)
 
             self.selector.register(connection, selectors.EVENT_READ | selectors.EVENT_WRITE, data = watcher)
+            
+            print(f"[SERVER] New watcher with address {address} has joined the game")
+            
             return
         
         player = ParticipantModel(connection, address)
@@ -77,12 +83,18 @@ class ServerModel:
 
         self.game.broadcastMessage(f"Player with address {player.address} has joined the game")
 
+        print(f"[SERVER] New player with address {address} has joined the game")
+
     def serveConnection(self, key, mask):
         participantSocket = key.fileobj
         participant = key.data
 
         if (mask & selectors.EVENT_READ):
             receivedData = participantSocket.recv(1024)
+
+            if receivedData:
+                receivedData = receivedData.decode(self.rules["format"])
+
 
         if (mask & selectors.EVENT_WRITE):
             participant.sendMessageWithGivenSocket(participantSocket)
@@ -98,7 +110,6 @@ class ServerModel:
                     self.handleConnectionRequest(key, mask)   
                 else:
                     self.serveConnection(key, mask)
-                    pass
 
     def run(self):
 
@@ -119,7 +130,15 @@ class ServerModel:
 
             self.game.setPlayerCountRequirement(N)
 
+            listeningThread = threading.Thread(target = self.listen)
+        
+            listeningThread.start()
 
+            
+
+            listeningThread.join()
+
+            self.closeConnections()
 
             N = input("Do you want to start the another game? Please type 'Yes' in any case if you want to start the another game: ")
             if N.lower() != "yes":

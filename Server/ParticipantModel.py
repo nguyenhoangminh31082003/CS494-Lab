@@ -2,8 +2,8 @@ import re
 import sys
 import queue
 
-from Server.Score import * 
-from Server.Mode import Mode
+from Score import * 
+from Mode import Mode
 
 class ParticipantModel:
 

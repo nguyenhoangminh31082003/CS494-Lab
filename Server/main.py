@@ -1,6 +1,6 @@
 import sys
 
-from Server.ServerModel import ServerModel
+from ServerModel import ServerModel
 
 if __name__ == "__main__":
     server = ServerModel()
