@@ -1,4 +1,5 @@
 import json
+
 from Message import Message
 from RequestStatusCode import RequestStatusCode
 
@@ -10,7 +11,10 @@ class Request(Message):
         self.data["content"] = content
 
     @staticmethod
-    def getDeserializedRequest(data):
+    def getDeserializedRequest(data : str):
         dictionary = json.loads(data)
-        request = Request(dictionary["status_code"], dictionary["content"])
+        request = Request(
+            statusCode = RequestStatusCode(dictionary["status_code"]), 
+            content = dictionary["content"]
+        )
         return request

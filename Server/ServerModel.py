@@ -6,6 +6,9 @@ import socket
 import json
 import os
 
+import sys
+sys.path.append("./Message/")
+
 from Response import Response
 from ResponseStatusCode import ResponseStatusCode
 from GameModel import GameModel
@@ -109,7 +112,7 @@ class ServerModel:
             print(f"[SERVER] Player with address {participant.address} has entered an invalid nickname ({nickname})")
             return False
 
-        if self.game.playerList.checkNicknameExist(nickname):
+        if self.game.containsPlayerWithNickname(nickname):
             participant.addResponse(Response(
                 statusCode=ResponseStatusCode.NICKNAME_ALREADY_TAKEN,
                 content="Nickname already taken. Please try again"
@@ -118,6 +121,7 @@ class ServerModel:
             return False
                         
         participant.setNickname(nickname)
+
         participant.addResponse(Response(
             statusCode=ResponseStatusCode.NICKNAME_ACCEPTED,
             content="Nickname accepted. Please wait the game to start"
@@ -149,11 +153,8 @@ class ServerModel:
                         nickname = request.getContent()
                     )
 
-                    
-
-
         if (mask & selectors.EVENT_WRITE):
-            participant.sendMessageWithGivenSocket(participantSocket)
+            participant.sendResponse(participantSocket)
 
     def listen(self):
 

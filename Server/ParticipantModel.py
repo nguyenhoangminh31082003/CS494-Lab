@@ -2,6 +2,9 @@ import re
 import sys
 import queue
 
+import sys
+sys.path.append("./Message/")
+
 from Score import * 
 from Mode import Mode
 from Response import Response
@@ -14,7 +17,7 @@ class ParticipantModel:
         self.score = 0
         self.nickname = None
         self.mode = Mode.WATCH
-        self.response = queue.Queue()
+        self.responses = queue.Queue()
 
     @staticmethod
     def checkNicknameValid(nickname: str) -> bool:
@@ -47,12 +50,20 @@ class ParticipantModel:
         self.mode = Mode.WATCH
     
     def addResponse(self, message):
-        self.response.put(message)
+        self.responses.put(message)
+
+    def isAlive(self) -> bool:
+        return self.mode != Mode.DIE
 
     def sendResponse(self, socket) -> bool:
 
-        if not self.response.empty():
-            message = self.response.get().toString().encode("utf-8")
+        if not self.responses.empty():
+
+            message = self.responses.get().toString().encode("utf-8")
+
+            #Somehow we need this line to avoid an error at client when client tries to deserialize the message
+            print(f"[SERVER] Sending response to {self.nickname} ({self.address}): {message}")
+
             try:
                 socket.sendall(message)
             except:

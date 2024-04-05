@@ -26,7 +26,7 @@ class GameModel:
         return len(self.players) >= self.requiredPlayerCount
 
     def setPlayerCountRequirement(self, count: int) -> bool:
-        if count < 2 or count > 10:
+        if (count < 2) or (count > 10):
             return False
         self.requiredPlayerCount = count
         self.saveGameInformation()
@@ -49,7 +49,7 @@ class GameModel:
             return json.load(file)
         
     def addPlayer(self, player: ParticipantModel) -> None:
-        self.playerList.addPlayer(player)
+        self.players.addPlayer(player)
 
     def addWatcher(self, watcher: ParticipantModel) -> None:
         self.watchers.append(watcher)
@@ -101,3 +101,6 @@ class GameModel:
             player.addResponse(message)
         for watcher in self.watchers:
             watcher.addResponse(message)
+
+    def containsPlayerWithNickname(self, nickname: str) -> bool:
+        return self.players.checkNicknameExist(nickname)
