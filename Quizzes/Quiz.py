@@ -8,7 +8,13 @@ class Quiz:
         self.keyword = keyword.strip().upper()
         
     def getQuestion(self) -> str:
-        raise self.question
+        return self.question
     
     def getKeyword(self) -> str:
-        raise self.keyword
+        return self.keyword
+    
+    def __str__(self) -> str:
+        return f"{self.keyword}: {self.question}"
+    
+    def __repr__(self) -> str:
+        return f"Quiz(keyword = {self.keyword}, question = {self.question})"

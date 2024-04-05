@@ -44,10 +44,13 @@ class PlayerList:
     def getFormattedSummary(self) -> str:
         resultLines = [
             f"Current player: {self.players[self.currentID].getNickname()}",
-            f"{"order".rjust(10)}| {"nickname".ljust(10)}| {"points".rjust(10)}"
+            f"{"order".rjust(10)}| {"nickname".rjust(10)}| {"points".rjust(10)}"
         ]
         
         for i, player in enumerate(self.players):
-            resultLines.append(f"{str(i).rjust(10)}| {player.getNickname().ljust(10)}| {str(player.score).rjust(10)}")
+            resultLines.append(f"{str(i).rjust(10)}| {player.getNickname().rjust(10)}| {str(player.score).rjust(10)}")
 
         return "\n".join(resultLines)
+    
+    def countSuccessfullyRegisteredPlayers(self) -> int:
+        return len([player for player in self.players if player.getNickname() is not None])

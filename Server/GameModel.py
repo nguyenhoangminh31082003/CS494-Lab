@@ -57,34 +57,17 @@ class GameModel:
     def addWatcher(self, watcher: ParticipantModel) -> None:
         self.watchers.append(watcher)
     
-    def handleGuess(self, guess: str, is_final_guess: bool) -> None:
-        if is_final_guess:
-            if self.currentQuizID.guessKeyword(guess):
-                self.players[self.currentPlayerID].correctAnswerKeyword()
-            else:
-                self.findNextPlayer()
-        else:
-            if self.currentQuizID.guessLetter(guess):
-                self.players[self.currentPlayerID].correctAnswerLetter()
-            else:
-                self.players[self.currentPlayerID].wrongAnswerKeyword()
-                self.alivePlayerCount -= 1
-                self.findNextPlayer()
-    
-    def summary(self) -> None:
-        # print only player with mode DIE and PLAY
-        self.isGameOn = False
-        raise NotImplementedError
-    
-    def startNewGame(self) -> None:
-        alivePlayerCount = len(self.players)
+    def startNewGame(self) -> bool:
+
+        if self.players.countSuccessfullyRegisteredPlayers() < self.rules["required_number_of_players"]:
+            return False
+
         self.roundCount = 0
-        self.setIndexToRandomQuiz()
-        self.currentPlayerID = 0
-        for i in range(alivePlayerCount):
-            self.players[i].reset()
         self.isGameOn = True
+        self.quizList.chooseRandomQuiz()
     
+        return True
+
     def getRoundCount(self) -> int:
         return self.roundCount
     
@@ -102,3 +85,6 @@ class GameModel:
     
     def findPlayerPosition(self, nickname: str) -> int:
         return self.players.findPlayerPosition(nickname)
+    
+    def getStartAnouncement(self) -> str:
+        return self.players.getFormattedSummary() + "\n" + self.quizList.getFormattedSummary()

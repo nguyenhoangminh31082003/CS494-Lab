@@ -7,10 +7,11 @@ class CurrentQuiz(Quiz):
             question = quiz.question, 
             keyword = quiz.keyword
         )
-        self.hint = ["*" for _ in len(self.keyword)]
+        
+        self.currentKeyword = ["*" for _ in range(len(self.keyword))]
 
-    def getHint(self) -> str:
-        return "".join(self.hint)
+    def getCurrentKeyword(self) -> str:
+        return "".join(self.currentKeyword)
 
     def receiveLetterGuess(self, letter : str) -> bool:
 
@@ -23,7 +24,7 @@ class CurrentQuiz(Quiz):
 
         for i in range(len(self.keyword)):
             if self.keyword[i] == letter:
-                self.hint[i] = letter
+                self.currentKeyword[i] = letter
                 result = True
 
         return result
@@ -31,7 +32,10 @@ class CurrentQuiz(Quiz):
     def receiveKeywordGuess(self, keyword : str) -> bool:
         
         if keyword.strip().upper() == self.keyword:
-            self.hint = self.keyword
+            self.currentKeyword = self.keyword
             return True
         
         return False
+    
+    def getKeywordLength(self) -> str:
+        return len(self.keyword)

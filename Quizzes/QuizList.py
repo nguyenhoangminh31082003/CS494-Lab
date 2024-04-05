@@ -21,7 +21,7 @@ class QuizList:
                 line = file.readline()
                 position = line.find(":")
                 self.quizzes.append(Quiz(
-                    question = line[position:],
+                    question = line[(position + 1):],
                     keyword = line[:position]
                 ))
 
@@ -37,4 +37,7 @@ class QuizList:
         return self.currentQuiz.receiveKeywordGuess(keyword)
     
     def getFormattedSummary(self) -> str:
-        pass
+        return "\n".join([
+            f"The length of the keyword is {self.currentQuiz.getKeywordLength()}: {self.currentQuiz.getCurrentKeyword()}",
+            f"Hint: {self.currentQuiz.getQuestion()}"
+        ])

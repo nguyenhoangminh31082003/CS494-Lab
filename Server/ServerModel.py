@@ -134,6 +134,12 @@ class ServerModel:
 
         print(f"[SERVER] Player with address {participant.address} has set the nickname as {nickname}")
 
+        if self.game.startNewGame():
+            self.game.broadcastResponse(Response(
+                statusCode = ResponseStatusCode.BROADCASTED_MESSAGE,
+                content = self.game.getStartAnouncement()
+            ))
+
         return True
 
     def serveConnection(self, key, mask):
@@ -191,7 +197,7 @@ class ServerModel:
         
             listeningThread.start()
 
-            
+            print(f"[SERVER] Server is running on {self.rules['host']}:{self.rules['port']} and starts listening")
 
             listeningThread.join()
 
