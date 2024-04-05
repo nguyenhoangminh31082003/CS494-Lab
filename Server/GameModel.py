@@ -6,15 +6,17 @@ import os
 from ParticipantModel import ParticipantModel
 from Quiz import Quiz
 from QuizList import QuizList
+from Response import Response
+from ResponseStatusCode import ResponseStatusCode
+from PlayerList import PlayerList
 
 class GameModel:
     
     def __init__(self) -> None:
         self.quizList = QuizList()
         self.roundCount = 0
-        self.players = []
+        self.players = PlayerList()
         self.watchers = []
-        self.alivePlayerCount = 0
         self.currentPlayerID = 0
         self.timeout = 20
         self.isGameOn = False
@@ -47,8 +49,7 @@ class GameModel:
             return json.load(file)
         
     def addPlayer(self, player: ParticipantModel) -> None:
-        self.players.append(player)
-        self.alivePlayerCount += 1
+        self.playerList.addPlayer(player)
 
     def addWatcher(self, watcher: ParticipantModel) -> None:
         self.watchers.append(watcher)
@@ -95,8 +96,8 @@ class GameModel:
     def checkGameOn(self) -> bool:
         return self.isGameOn
     
-    def broadcastMessage(self, message: str) -> None:
+    def broadcastResponse(self, message: Response) -> None:
         for player in self.players:
-            player.addMessageToBeSent(message)
+            player.addResponse(message)
         for watcher in self.watchers:
-            watcher.addMessageToBeSent(message)
+            watcher.addResponse(message)

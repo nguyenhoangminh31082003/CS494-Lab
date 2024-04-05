@@ -4,6 +4,7 @@ import queue
 
 from Score import * 
 from Mode import Mode
+from Response import Response
 
 class ParticipantModel:
 
@@ -13,7 +14,7 @@ class ParticipantModel:
         self.score = 0
         self.nickname = None
         self.mode = Mode.WATCH
-        self.messagesToBeSent = queue.Queue()
+        self.response = queue.Queue()
 
     @staticmethod
     def checkNicknameValid(nickname: str) -> bool:
@@ -44,21 +45,16 @@ class ParticipantModel:
         
     def becomeWatcher(self) -> None:
         self.mode = Mode.WATCH
-
-    def getMessageToBeSent(self):
-        if not self.messagesToBeSent.empty():
-            return self.messagesToBeSent.get()
-        return None
     
-    def addMessageToBeSent(self, message):
-        self.messagesToBeSent.put(message)
+    def addResponse(self, message):
+        self.response.put(message)
 
-    def sendMessageWithGivenSocket(self, socket) -> bool:
+    def sendResponse(self, socket) -> bool:
 
-        if not self.messagesToBeSent.empty():
-            message = self.messagesToBeSent.get()
+        if not self.response.empty():
+            message = self.response.get().toString().encode("utf-8")
             try:
-                socket.sendall(message.encode("utf-8"))
+                socket.sendall(message)
             except:
                 return False
             return True

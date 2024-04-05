@@ -6,8 +6,12 @@ import socket
 import json
 import os
 
+from Response import Response
+from ResponseStatusCode import ResponseStatusCode
 from GameModel import GameModel
 from ParticipantModel import ParticipantModel
+from Request import Request
+from RequestStatusCode import RequestStatusCode
 
 class ServerModel:
 
@@ -65,14 +69,17 @@ class ServerModel:
             watcher = ParticipantModel(connection, address)
             watcher.becomeWatcher()
 
-            watcher.addMessageToBeSent("Sorry, the game is full. You can only watch the game")
+            watcher.addResponse(Response(
+                statusCode=ResponseStatusCode.GAME_FULL,
+                content="Sorry, the game is full. You can only watch the game"
+            ))
 
             self.game.addWatcher(watcher)
 
             self.selector.register(connection, selectors.EVENT_READ | selectors.EVENT_WRITE, data = watcher)
             
             print(f"[SERVER] New watcher with address {address} has joined the game")
-            
+
             return
         
         player = ParticipantModel(connection, address)
@@ -81,9 +88,49 @@ class ServerModel:
 
         self.selector.register(connection, selectors.EVENT_READ | selectors.EVENT_WRITE, data = player)
 
-        self.game.broadcastMessage(f"Player with address {player.address} has joined the game")
+        self.game.broadcastResponse(Response(
+            statusCode=ResponseStatusCode.BROADCASTED_MESSAGE,
+            content=f"Player with address {player.address} has joined the game"
+        ))
 
         print(f"[SERVER] New player with address {address} has joined the game")
+
+        player.addResponse(Response(
+            statusCode=ResponseStatusCode.NICKNAME_REQUIREMENT,
+            content="You need a nickname to continue the game"
+        ))
+
+    def handleNicknameRequest(self, participant : ParticipantModel, nickname : str) -> bool:
+        if not ParticipantModel.checkNicknameValid(nickname):
+            participant.addResponse(Response(
+                statusCode=ResponseStatusCode.INVALID_NICKNAME,
+                content="Invalid nickname. Please try again"
+            ))
+            print(f"[SERVER] Player with address {participant.address} has entered an invalid nickname ({nickname})")
+            return False
+
+        if self.game.playerList.checkNicknameExist(nickname):
+            participant.addResponse(Response(
+                statusCode=ResponseStatusCode.NICKNAME_ALREADY_TAKEN,
+                content="Nickname already taken. Please try again"
+            ))
+            print(f"[SERVER] Player with address {participant.address} has entered a nickname ({nickname}) that is already taken")
+            return False
+                        
+        participant.setNickname(nickname)
+        participant.addResponse(Response(
+            statusCode=ResponseStatusCode.NICKNAME_ACCEPTED,
+            content="Nickname accepted. Please wait the game to start"
+        ))
+
+        self.game.broadcastResponse(Response(
+            statusCode=ResponseStatusCode.BROADCASTED_MESSAGE,
+            content=f"Player with address {participant.address} has set the nickname as {nickname}"
+        ))
+
+        print(f"[SERVER] Player with address {participant.address} has set the nickname as {nickname}")
+
+        return True
 
     def serveConnection(self, key, mask):
         participantSocket = key.fileobj
@@ -93,7 +140,16 @@ class ServerModel:
             receivedData = participantSocket.recv(1024)
 
             if receivedData:
-                receivedData = receivedData.decode(self.rules["format"])
+                request = Request.getDeserializedRequest(receivedData.decode(self.rules["format"]))
+
+                if request.getStatusCode() == RequestStatusCode.NICKNAME_REQUEST:
+                    
+                    self.handleNicknameRequest(
+                        participant = participant, 
+                        nickname = request.getContent()
+                    )
+
+                    
 
 
         if (mask & selectors.EVENT_WRITE):
