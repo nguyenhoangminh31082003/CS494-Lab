@@ -48,3 +48,6 @@ class QuizList:
             "question": self.currentQuiz.getQuestion(),
             "keyword": self.currentQuiz.getCurrentKeyword()
         })
+    
+    def getCurrentQuiz(self) -> CurrentQuiz:
+        return self.currentQuiz

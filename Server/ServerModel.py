@@ -8,13 +8,17 @@ import os
 
 import sys
 sys.path.append("./Message/")
+sys.path.append("./Participants/")
+sys.path.append("./Game/")
 
-from Response import Response
-from ResponseStatusCode import ResponseStatusCode
-from GameModel import GameModel
-from ParticipantModel import ParticipantModel
 from Request import Request
+from Response import Response
+from GameModel import GameModel
+from GameStatus import GameStatus
+from ParticipantModel import ParticipantModel
 from RequestStatusCode import RequestStatusCode
+from ResponseStatusCode import ResponseStatusCode
+
 
 class ServerModel:
 
@@ -105,7 +109,7 @@ class ServerModel:
 
     def startGame(self):
         if self.game.startNewGame():
-            self.game.broadcastStartAnouncement()
+            self.game.broadcastSummary()
             self.game.requireCurrentPlayerAnswer()
 
     def handleNicknameRequest(self, participant : ParticipantModel, nickname : str) -> bool:
@@ -171,7 +175,7 @@ class ServerModel:
 
     def listen(self):
 
-        while self.isRunning:
+        while self.game.getStatus().isNotOff():
 
             events = self.selector.select(timeout=None)
 
@@ -181,24 +185,31 @@ class ServerModel:
                 else:
                     self.serveConnection(key, mask)
 
+    def readPlayerCountRequirement(self) -> int:
+        N = 0
+
+        while True:
+            N = int(input("Enter the number of players (between 2 and 10): "))
+            if (N < 2) or (N > 10):
+                print("Invalid number of players. Please try again.")            
+            else:
+                break
+
+        return N
+
     def run(self):
 
         self.isRunning = True
 
         while True:
 
-            N = 0
-
-            while True:
-                N = int(input("Enter the number of players (between 2 and 10): "))
-                if (N < 2) or (N > 10):
-                    print("Invalid number of players. Please try again.")            
-                else:
-                    break
+            N = self.readPlayerCountRequirement()
 
             self.createListeningSocketAndSelector()
 
             self.game.setPlayerCountRequirement(N)
+
+            self.game.ready()
 
             listeningThread = threading.Thread(target = self.listen)
         
@@ -210,8 +221,8 @@ class ServerModel:
 
             self.closeConnections()
 
-            N = input("Do you want to start the another game? Please type 'Yes' in any case if you want to start the another game: ")
-            if N.lower() != "yes":
+            N = input("Do you want to start the another game? Please type 'Yes' in any case if you want to start the another game: ").lower()
+            if N != "yes":
                 print("See you later")
                 break
 

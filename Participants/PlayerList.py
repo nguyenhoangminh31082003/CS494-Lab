@@ -3,6 +3,9 @@ import random
 import json
 import os
 
+import sys
+sys.path.append("./Participants/")
+
 from ParticipantModel import ParticipantModel
 
 class PlayerList:
@@ -60,12 +63,22 @@ class PlayerList:
     def countSuccessfullyRegisteredPlayers(self) -> int:
         return len([player for player in self.players if player.getNickname() is not None])
     
-    def moveTurnToNextPlayer(self) -> None:
+    def moveTurnToNextPlayer(self) -> bool:
         playerCount = len(self.players)
 
-        self.currentID = (self.currentID + 1) % playerCount
-        while not self.players[self.currentID].isAlive():
-            self.currentID = (self.currentID + 1) % playerCount
+        result = False
+
+        while True:
+            self.currentID += 1
+
+            if self.currentID >= playerCount:
+                self.currentID = 0
+                result = True
+
+            if self.players[self.currentID].isAlive():
+                break
+
+        return result
 
     def disqualifyCurrentPlayer(self) -> bool:
         currentPlayer = self.getCurrentPlayer()
@@ -73,9 +86,5 @@ class PlayerList:
         currentPlayer.die()
 
         self.countAlivePlayers -= 1
-
-        if self.countAlivePlayers >= 1
-            self.moveTurnToNextPlayer()
-            return True
         
-        return False
+        return self.countAlivePlayers >= 1

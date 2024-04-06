@@ -15,7 +15,7 @@ class ParticipantModel:
         self.address = address
         self.score = 0
         self.nickname = None
-        self.mode = Mode.WATCH
+        self.mode = PlayerMode.WATCH
         self.responses = queue.Queue()
 
     def __str__(self):
@@ -37,7 +37,7 @@ class ParticipantModel:
     
     def reset(self):
         self.score = 0
-        self.mode = Mode.PLAY
+        self.mode = PlayerMode.PLAY
         
     def increaseScore(self, score : int):
         self.score += score

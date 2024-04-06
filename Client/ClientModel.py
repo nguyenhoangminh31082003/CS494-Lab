@@ -43,6 +43,9 @@ class ClientModel:
                 content = nickname
             ))
 
+    def closeConnection(self):
+        self.clientSocket.close()
+
     def listen(self):
         while True:
             receivedData = self.clientSocket.recv(1024).decode()
@@ -57,6 +60,10 @@ class ClientModel:
                     self.handleRegistration(statusCode, content)        
                 elif statusCode == ResponseStatusCode.BROADCASTED_MESSAGE:
                     print(content)
+                elif statusCode == ResponseStatusCode.GAME_ENDED:
+                    print(content)
+                    self.closeConnection()
+                    break
                 elif statusCode == ResponseStatusCode.QUESTION_SENT:
                     question = json.loads(content)
                     #Remember to continue here
@@ -75,8 +82,8 @@ class ClientModel:
                     self.sendRequest(Request(
                         statusCode = RequestStatusCode.ANSWER_SUBMISSION,
                         content = json.dumps({
-                            "guessedCharacter": guessedCharacter,
-                            "guessedKeyword": guessedKeyword
+                            "guessed_character": guessedCharacter,
+                            "guessed_keyword": guessedKeyword
                         })
                     ))
 
