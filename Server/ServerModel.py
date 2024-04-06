@@ -103,6 +103,12 @@ class ServerModel:
             content="You need a nickname to continue the game"
         ))
 
+    def startGame(self):
+        if self.game.startNewGame():
+            self.game.broadcastStartAnouncement()
+            self.game.broadcastQuestion()
+
+
     def handleNicknameRequest(self, participant : ParticipantModel, nickname : str) -> bool:
         if not ParticipantModel.checkNicknameValid(nickname):
             participant.addResponse(Response(
@@ -134,11 +140,7 @@ class ServerModel:
 
         print(f"[SERVER] Player with address {participant.address} has set the nickname as {nickname}")
 
-        if self.game.startNewGame():
-            self.game.broadcastResponse(Response(
-                statusCode = ResponseStatusCode.BROADCASTED_MESSAGE,
-                content = self.game.getStartAnouncement()
-            ))
+        self.startGame()
 
         return True
 

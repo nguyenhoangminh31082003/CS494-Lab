@@ -19,12 +19,8 @@ class ClientModel:
         self.clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.clientSocket.connect((host, port))
 
-    # def handleAnIteration(self):
-    #     message = self.client.recv(1024).decode()
-    #     if message == "Please enter your nickname: ":
-    #         nickname = input(message)
-    #         self.client.send(nickname.encode())
-    #         return
+    def sendRequest(self, request : Request) -> None:
+        self.clientSocket.send(request.toString().encode())
 
     def listen(self):
         while True:
@@ -33,26 +29,36 @@ class ClientModel:
             if receivedData:
                 response = Response.getDeserializedResponse(receivedData)
 
-                if response.getStatusCode() == ResponseStatusCode.NICKNAME_ACCEPTED:
-                    print(response.getContent())
+                statusCode = response.getStatusCode()
+                content = response.getContent()
+
+                if statusCode == ResponseStatusCode.NICKNAME_ACCEPTED:
+                    print(content)
 
                 nickname = None
                 
-                if response.getStatusCode() == ResponseStatusCode.NICKNAME_REQUIREMENT:
+                if statusCode == ResponseStatusCode.NICKNAME_REQUIREMENT:
                     nickname = input("Please enter your nickname: ")
-                elif response.getStatusCode() == ResponseStatusCode.INVALID_NICKNAME:
+                elif statusCode == ResponseStatusCode.INVALID_NICKNAME:
                     nickname = input("The chosen nickname is not valid. Please enter a valid nickname: ")
-                elif response.getStatusCode() == ResponseStatusCode.NICKNAME_ALREADY_TAKEN:
+                elif statusCode == ResponseStatusCode.NICKNAME_ALREADY_TAKEN:
                     nickname = input("The chosen nickname is already taken. Please enter another nickname: ")
                 
                 if nickname is not None:
-                    self.clientSocket.send(Request(
+                    self.sendRequest(Request(
                         statusCode = RequestStatusCode.NICKNAME_REQUEST, 
                         content = nickname
-                    ).toString().encode())
+                    ))
 
-                if response.getStatusCode() == ResponseStatusCode.BROADCASTED_MESSAGE:
-                    print(response.getContent())
+                if statusCode == ResponseStatusCode.BROADCASTED_MESSAGE:
+                    print(content)
+
+                if statusCode == ResponseStatusCode.ANSWER_REQUIRED:
+                    answer = input(content)
+                    self.sendRequest(Request(
+                        statusCode = RequestStatusCode.ANSWER_SUBMISSION,
+                        content = answer
+                    ))
 
     def run(self):
         
@@ -63,29 +69,3 @@ class ClientModel:
             
 
         listeningThread.join()
-    
-    def registration(self):
-        raise NotImplementedError
-    
-    def submitAnswer(self):
-        raise NotImplementedError
-    
-    def submitRegistration(self):
-        raise NotImplementedError
-    
-    def submitDisconnect(self):
-        raise NotImplementedError
-    
-    def updateCountDown(self):
-        raise NotImplementedError
-    
-    def displayQuiz(self):
-        raise NotImplementedError
-    
-    def displayDashboard(self):
-        raise NotImplementedError
-    
-    def displaySummary(self):
-        raise NotImplementedError
-    
-    

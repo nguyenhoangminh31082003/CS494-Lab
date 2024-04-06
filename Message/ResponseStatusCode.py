@@ -7,3 +7,4 @@ class ResponseStatusCode(enum.IntEnum):
     NICKNAME_ACCEPTED = 4
     BROADCASTED_MESSAGE = 5
     GAME_FULL = 6
+    ANSWER_REQUIRED = 8

@@ -1,5 +1,6 @@
 import sys
 import random
+import json
 
 from Quiz import Quiz
 from CurrentQuiz import CurrentQuiz
@@ -41,3 +42,9 @@ class QuizList:
             f"The length of the keyword is {self.currentQuiz.getKeywordLength()}: {self.currentQuiz.getCurrentKeyword()}",
             f"Hint: {self.currentQuiz.getQuestion()}"
         ])
+
+    def getSerializedQuestion(self) -> str:
+        return json.dumps({
+            "question": self.currentQuiz.getQuestion(),
+            "keyword": self.currentQuiz.getCurrentKeyword()
+        })

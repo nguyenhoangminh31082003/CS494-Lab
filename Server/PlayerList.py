@@ -12,6 +12,11 @@ class PlayerList:
         self.countAlivePlayers = 0
         self.currentID = 0
 
+    def getCurrentPlayer(self):
+        if (0 <= self.currentID) and (self.currentID < len(self.players)):
+            return self.players[self.currentID]
+        return None
+
     def __getitem__(self, key : int) -> ParticipantModel:   
         return self.players[key]
     

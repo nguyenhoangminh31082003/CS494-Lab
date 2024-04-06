@@ -5,6 +5,7 @@ import os
 
 import sys
 sys.path.append("./Quizzes/")
+sys.path.append("./Message/")
 
 from ParticipantModel import ParticipantModel
 from Quiz import Quiz
@@ -88,3 +89,21 @@ class GameModel:
     
     def getStartAnouncement(self) -> str:
         return self.players.getFormattedSummary() + "\n" + self.quizList.getFormattedSummary()
+    
+    def broadcastStartAnouncement(self) -> None:
+        self.game.broadcastResponse(Response(
+            statusCode = ResponseStatusCode.BROADCASTED_MESSAGE,
+            content = self.game.getStartAnouncement()
+        ))
+
+    def broadcastQuestion(self) -> None:
+        self.broadcastResponse(Response(
+            statusCode = ResponseStatusCode.BROADCASTED_MESSAGE,
+            content = self.quizList.getSerializedQuestion()
+        ))
+
+    def requestCurrentPlayerAnswer(self) -> None:
+        self.players.getCurrentPlayer().addResponse(Response(
+            statusCode = ResponseStatusCode.ANSWER_REQUIRED,
+            content = "Please enter your answer"
+        ))
