@@ -91,19 +91,61 @@ class GameModel:
         return self.players.getFormattedSummary() + "\n" + self.quizList.getFormattedSummary()
     
     def broadcastStartAnouncement(self) -> None:
-        self.game.broadcastResponse(Response(
+        self.broadcastResponse(Response(
             statusCode = ResponseStatusCode.BROADCASTED_MESSAGE,
-            content = self.game.getStartAnouncement()
+            content = self.getStartAnouncement()
         ))
 
     def broadcastQuestion(self) -> None:
         self.broadcastResponse(Response(
-            statusCode = ResponseStatusCode.BROADCASTED_MESSAGE,
+            statusCode = ResponseStatusCode.QUESTION_SENT,
             content = self.quizList.getSerializedQuestion()
         ))
 
-    def requestCurrentPlayerAnswer(self) -> None:
+    def requireCurrentPlayerAnswer(self) -> None:
         self.players.getCurrentPlayer().addResponse(Response(
             statusCode = ResponseStatusCode.ANSWER_REQUIRED,
-            content = "Please enter your answer"
+            content = json.dumps({
+                "keyword_guess_allowance": (self.roundCount > 2)
+            })
         ))
+
+    def handleAnswerSubmission(self, answer: dict) -> bool:
+        if not self.checkGameOn():
+            return False
+        
+        guessedCharacter = answer["guessed_character"]
+        guessedKeyword = answer["guessed_keyword"]
+
+        currentPlayer = self.players.getCurrentPlayer()
+        quiz = self.quizList.getCurrentQuiz()
+
+        guessCorrectness = quiz.receiveLetterGuess(guessedCharacter)
+
+        if guessCorrectness:
+            currentPlayer.score += self.rules["number_of_points_granted_for_correct_guess"]
+        
+        if guessedKeyword is not None:
+            if quiz.receiveKeywordGuess(guessedKeyword):
+                currentPlayer.score += self.rules["number_of_points_granted_for_correct_keyword"]
+            else:
+                self.players.disqualifyCurrentPlayer()
+        
+        self.roundCount += 1
+
+        if quiz.isSolved():
+            self.isGameOn = False
+        
+            self.broadcastResponse(Response(
+                statusCode = ResponseStatusCode.GAME_ENDED,
+                content = f"Congratulations to the {currentPlayer.getNickname()} with the correct keyword is \"{quiz.getKeyword()}\""
+            ))
+        
+            return True
+        
+        if guessCorrectness:
+            pass
+        else:
+            self.players.moveTurnToNextPlayer()
+        
+        return False

@@ -59,3 +59,23 @@ class PlayerList:
     
     def countSuccessfullyRegisteredPlayers(self) -> int:
         return len([player for player in self.players if player.getNickname() is not None])
+    
+    def moveTurnToNextPlayer(self) -> None:
+        playerCount = len(self.players)
+
+        self.currentID = (self.currentID + 1) % playerCount
+        while not self.players[self.currentID].isAlive():
+            self.currentID = (self.currentID + 1) % playerCount
+
+    def disqualifyCurrentPlayer(self) -> bool:
+        currentPlayer = self.getCurrentPlayer()
+
+        currentPlayer.die()
+
+        self.countAlivePlayers -= 1
+
+        if self.countAlivePlayers >= 1
+            self.moveTurnToNextPlayer()
+            return True
+        
+        return False

@@ -10,6 +10,9 @@ class CurrentQuiz(Quiz):
         
         self.currentKeyword = ["*" for _ in range(len(self.keyword))]
 
+    def isSolved(self) -> bool:
+        return self.keyword == self.getCurrentKeyword()
+
     def getCurrentKeyword(self) -> str:
         return "".join(self.currentKeyword)
 

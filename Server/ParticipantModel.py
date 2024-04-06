@@ -5,7 +5,7 @@ import queue
 import sys
 sys.path.append("./Message/")
 
-from Mode import Mode
+from PlayerMode import PlayerMode
 from Response import Response
 
 class ParticipantModel:
@@ -42,17 +42,17 @@ class ParticipantModel:
     def increaseScore(self, score : int):
         self.score += score
         
-    def wrongAnswerKeyword(self):
-        self.mode = Mode.DIE
+    def die(self):
+        self.mode = PlayerMode.DIE
         
     def becomeWatcher(self) -> None:
-        self.mode = Mode.WATCH
+        self.mode = PlayerMode.WATCH
     
     def addResponse(self, message):
         self.responses.put(message)
 
     def isAlive(self) -> bool:
-        return self.mode != Mode.DIE
+        return self.mode != PlayerMode.DIE
 
     def sendResponse(self, socket) -> bool:
 

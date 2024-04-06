@@ -8,3 +8,13 @@ class ResponseStatusCode(enum.IntEnum):
     BROADCASTED_MESSAGE = 5
     GAME_FULL = 6
     ANSWER_REQUIRED = 8
+    QUESTION_SENT = 9
+    GAME_ENDED = 10
+
+    def isNicknameRelated(self) -> bool:
+        return self in [
+            ResponseStatusCode.NICKNAME_REQUIREMENT, 
+            ResponseStatusCode.INVALID_NICKNAME, 
+            ResponseStatusCode.NICKNAME_ALREADY_TAKEN, 
+            ResponseStatusCode.NICKNAME_ACCEPTED
+        ]

@@ -106,8 +106,7 @@ class ServerModel:
     def startGame(self):
         if self.game.startNewGame():
             self.game.broadcastStartAnouncement()
-            self.game.broadcastQuestion()
-
+            self.game.requireCurrentPlayerAnswer()
 
     def handleNicknameRequest(self, participant : ParticipantModel, nickname : str) -> bool:
         if not ParticipantModel.checkNicknameValid(nickname):
@@ -154,12 +153,18 @@ class ServerModel:
             if receivedData:
                 request = Request.getDeserializedRequest(receivedData.decode(self.rules["format"]))
 
-                if request.getStatusCode() == RequestStatusCode.NICKNAME_REQUEST:
+                statusCode = request.getStatusCode()
+                content = request.getContent()
+
+                if statusCode == RequestStatusCode.NICKNAME_REQUEST:
                     
                     self.handleNicknameRequest(
                         participant = participant, 
                         nickname = request.getContent()
                     )
+
+                elif statusCode == RequestStatusCode.ANSWER_SUBMISSION:
+                    self.game.handleAnswerSubmission(json.loads(content))
 
         if (mask & selectors.EVENT_WRITE):
             participant.sendResponse(participantSocket)
