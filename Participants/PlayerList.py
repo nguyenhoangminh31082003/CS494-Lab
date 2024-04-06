@@ -15,6 +15,11 @@ class PlayerList:
         self.countAlivePlayers = 0
         self.currentID = 0
 
+    def clear(self) -> None:
+        self.players.clear()
+        self.countAlivePlayers = 0
+        self.currentID = 0
+
     def getCurrentPlayer(self):
         if (0 <= self.currentID) and (self.currentID < len(self.players)):
             return self.players[self.currentID]
@@ -52,11 +57,39 @@ class PlayerList:
     def getFormattedSummary(self) -> str:
         resultLines = [
             f"Current player: {self.players[self.currentID].getNickname()}",
-            f"{"order".rjust(10)}| {"nickname".rjust(10)}| {"points".rjust(10)}"
+            f"{"Order".rjust(10)}| {"Nickname".rjust(10)}| {"Points".rjust(10)}| {"Alive".rjust(10)}"
         ]
         
         for i, player in enumerate(self.players):
-            resultLines.append(f"{str(i).rjust(10)}| {player.getNickname().rjust(10)}| {str(player.score).rjust(10)}")
+            resultLines.append(f"{str(i).rjust(10)}| {player.getNickname().rjust(10)}| {str(player.score).rjust(10)}| {("Yes" if player.isAlive() else "No").rjust(10)}")
+
+        return "\n".join(resultLines)
+    
+    def getRankSummary(self) -> str:
+        winners = []
+        playerCount = len(self.players)
+        indices = list(range(playerCount))
+        indices.sort(key = lambda x: self.players[x].score, reverse = True)
+        points = -1
+        rank = 0
+
+        resultLines = [
+            f"{"Rank".rjust(10)} | {"Order".rjust(10)}| {"Nickname".rjust(10)}| {"Points".rjust(10)}"
+        ]
+
+        for i, index in enumerate(indices):
+            score = self.players[index].score
+            if points != score:
+                points = score
+                rank = i + 1
+            if rank == 1:
+                winners.append(index)
+            resultLines.append(f"{str(rank).rjust(10)} | {str(index).rjust(10)}| {self.players[index].getNickname().rjust(10)}| {str(points).rjust(10)}")
+
+        if len(winners) == 1:
+            resultLines.append(f"\n{self.players[winners[0]].getNickname()} is the winner!")
+        else:
+            resultLines.append(f"\nWinners are: {', '.join([self.players[winners[i]].getNickname() for i in range(len(winners))])}")
 
         return "\n".join(resultLines)
     

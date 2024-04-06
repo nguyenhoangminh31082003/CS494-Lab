@@ -185,6 +185,9 @@ class ServerModel:
                 else:
                     self.serveConnection(key, mask)
 
+            if self.game.getStatus().isEnded() and (not self.game.containsUnsentResponse()):
+                self.game.stop()
+
     def readPlayerCountRequirement(self) -> int:
         N = 0
 

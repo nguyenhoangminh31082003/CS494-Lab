@@ -71,3 +71,6 @@ class ParticipantModel:
             return True
 
         return False
+    
+    def containsUnsentResponse(self) -> bool:
+        return not self.responses.empty()

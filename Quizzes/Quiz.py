@@ -6,6 +6,13 @@ class Quiz:
     def __init__(self, question : str, keyword : str):
         self.question = question.strip()
         self.keyword = keyword.strip().lower()
+
+    def countOccernerces(self, character : str) -> int:
+    
+        if len(character) != 1:
+            return 0
+    
+        return self.keyword.count(character)
         
     def getQuestion(self) -> str:
         return self.question

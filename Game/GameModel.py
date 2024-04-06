@@ -8,13 +8,13 @@ sys.path.append("./Quizzes/")
 sys.path.append("./Message/")
 sys.path.append("./Participants/")
 
-from ParticipantModel import ParticipantModel
 from Quiz import Quiz
 from QuizList import QuizList
 from Response import Response
-from ResponseStatusCode import ResponseStatusCode
 from PlayerList import PlayerList
 from GameStatus import GameStatus
+from ParticipantModel import ParticipantModel
+from ResponseStatusCode import ResponseStatusCode
 
 class GameModel:
     
@@ -115,27 +115,26 @@ class GameModel:
                 "keyword_guess_allowance": (self.roundCount >= 2)
             })
         ))
-
-    def findWinner(self) -> ParticipantModel:
-        result = i
-        for i, player in enumerate(self.players):
-            if self.players[result].score < player.score:
-                result = i
-        return self.players[result]
     
-    def stopTheGame(self) -> None:
-        self.status = GameStatus.OFF
+    def end(self) -> None:
+        self.broadcastFinalResult()
+        self.status = GameStatus.ENDED
         self.broadcastResponse(Response(
             statusCode = ResponseStatusCode.GAME_ENDED,
             content = "Game ended!!!"
         ))
+
+    def stop(self) -> None:
+        self.status = GameStatus.OFF
+        self.players.clear()
+        self.watchers.clear()
 
     def moveTurnToNextPlayer(self) -> bool:
         #Return True if the game is still on, False otherwise
         if self.players.moveTurnToNextPlayer():
             self.roundCount += 1
             if self.roundCount >= 5:
-                self.stopTheGame()
+                self.end()
                 return False
         return self.status.isRunning()
         
@@ -153,22 +152,39 @@ class GameModel:
 
         if quiz.receiveLetterGuess(guessedCharacter):
             currentPlayer.score += self.rules["number_of_points_granted_for_correct_guess"]
+            self.broadcastResponse(Response(
+                statusCode = ResponseStatusCode.BROADCASTED_MESSAGE,
+                content = f"Character '{guessedCharacter}' has {quiz.countOccernerces(guessedCharacter)} occurences in the keyword!!!"
+            ))
         else:
+            self.broadcastResponse(Response(
+                statusCode = ResponseStatusCode.BROADCASTED_MESSAGE,
+                content = f"Character '{guessedCharacter}' is not in the keyword!!!"
+            ))
             flag = True
 
         if guessedKeyword is not None:
             if quiz.receiveKeywordGuess(guessedKeyword):
                 currentPlayer.score += self.rules["number_of_points_granted_for_correct_keyword"]
+                self.broadcastResponse(Response(
+                    statusCode = ResponseStatusCode.BROADCASTED_MESSAGE,
+                    content = f"{currentPlayer.getNickname()} has guessed the keyword!!!"
+                ))
             else:
 
+                self.broadcastResponse(Response(
+                    statusCode = ResponseStatusCode.BROADCASTED_MESSAGE,
+                    content = f"{currentPlayer.getNickname()} has guessed the wrong keyword!!!"
+                ))
+
                 if not self.players.disqualifyCurrentPlayer():
-                    self.stopTheGame()
+                    self.end()
                     return True
 
                 flag = True
 
         if quiz.isSolved():
-            self.stopTheGame()
+            self.end()
             return True
             
         if flag:
@@ -183,3 +199,22 @@ class GameModel:
     
     def getStatus(self) -> GameStatus:
         return self.status
+    
+    def broadcastFinalResult(self) -> None:
+      
+        self.broadcastResponse(Response(
+            statusCode = ResponseStatusCode.BROADCASTED_MESSAGE,
+            content = self.players.getRankSummary()
+        ))
+
+    def containsUnsentResponse(self) -> bool:
+   
+        for watcher in self.watchers:
+            if watcher.containsUnsentResponse():
+                return True
+    
+        for player in self.players:
+            if player.containsUnsentResponse():
+                return True
+            
+        return False

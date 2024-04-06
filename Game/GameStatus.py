@@ -3,7 +3,8 @@ import enum
 class GameStatus(enum.IntEnum):
     OFF = 0,
     READY = 1,
-    RUNNING = 2
+    RUNNING = 2,
+    ENDED = 3
 
     def isOff(self):
         return self == GameStatus.OFF
@@ -16,3 +17,6 @@ class GameStatus(enum.IntEnum):
     
     def isNotOff(self):
         return self != GameStatus.OFF
+    
+    def isEnded(self):
+        return self == GameStatus.ENDED

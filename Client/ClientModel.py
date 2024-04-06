@@ -43,6 +43,24 @@ class ClientModel:
                 content = nickname
             ))
 
+    def handleAnswerSubmission(self, turnDetails: dict) -> None:
+            
+        guessedCharacter = input("Please guess a character: ")
+        guessedKeyword = None
+
+        if turnDetails["keyword_guess_allowance"]:
+            guessedKeyword = input("Please guess the keyword (enter nothing if you do not want go guess): ")
+            if guessedKeyword == "": 
+                guessedKeyword = None
+
+        self.sendRequest(Request(
+        statusCode = RequestStatusCode.ANSWER_SUBMISSION,
+            content = json.dumps({
+                "guessed_character": guessedCharacter,
+                "guessed_keyword": guessedKeyword
+            })
+        ))
+
     def closeConnection(self):
         self.clientSocket.close()
 
@@ -60,32 +78,17 @@ class ClientModel:
                     self.handleRegistration(statusCode, content)        
                 elif statusCode == ResponseStatusCode.BROADCASTED_MESSAGE:
                     print(content)
+                elif statusCode == ResponseStatusCode.GAME_FULL:
+                    print(content)
+                    #This block might be changed in the future
                 elif statusCode == ResponseStatusCode.GAME_ENDED:
                     print(content)
                     self.closeConnection()
                     break
                 elif statusCode == ResponseStatusCode.QUESTION_SENT:
                     question = json.loads(content)
-                    #Remember to continue here
                 elif statusCode == ResponseStatusCode.ANSWER_REQUIRED:
-                    turnDetails = json.loads(content)
-            
-                    guessedCharacter = input("Please guess a character: ")
-
-                    if turnDetails["keyword_guess_allowance"]:
-                        guessedKeyword = input("Please guess the keyword (enter nothing if you do not want go guess): ")
-                        if guessedKeyword == "": 
-                            guessedKeyword = None
-                    else:
-                        guessedKeyword = None
-
-                    self.sendRequest(Request(
-                        statusCode = RequestStatusCode.ANSWER_SUBMISSION,
-                        content = json.dumps({
-                            "guessed_character": guessedCharacter,
-                            "guessed_keyword": guessedKeyword
-                        })
-                    ))
+                    self.handleAnswerSubmission(json.loads(content))
 
     def run(self):
         
