@@ -145,6 +145,7 @@ class GameModel:
         self.status = GameStatus.OFF
         self.players.clear()
         self.watchers.clear()
+        self.guessedCharacters.clear()
 
     def moveTurnToNextPlayer(self) -> bool:
         #Return True if the game is still on, False otherwise
@@ -161,6 +162,9 @@ class GameModel:
         
         guessedCharacter = answer["guessed_character"]
         guessedKeyword = answer["guessed_keyword"]
+
+        if guessedCharacter not in self.guessedCharacters:
+            self.guessedCharacters.append(guessedCharacter)
 
         currentPlayer = self.players.getCurrentPlayer()
         quiz = self.quizList.getCurrentQuiz()

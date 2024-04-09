@@ -69,11 +69,11 @@ class PlayerList:
         result = {
             "current_player": self.players[self.currentID].getNickname(),
             "player_count": len(self.players),
-            "play_information": []
+            "player_information": []
         }
 
         for i, player in enumerate(self.players):
-            result["play_information"].append({
+            result["player_information"].append({
                 "order": i,
                 "nickname": player.getNickname(),
                 "points": player.score,
