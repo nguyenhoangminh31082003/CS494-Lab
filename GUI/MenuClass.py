@@ -3,6 +3,8 @@ import Constant
 import TextClass
 import ButtonClass
 
+
+
 # enum for screen view
 class ScreenView:
     REGISTER = 0
@@ -16,18 +18,20 @@ class Menu:
         pygame.init()
 
         ### Prepare data
-        self.ScreenView = 2
+        self.ScreenView = 1
         self.nickname = ""
         self.word = "***W**"
         self.score = 0
         self.round = 0
         self.turn = 0
+        self.submit = False
         self.players_List = {
             "Lisa" : 10,
             "Ana" : 5,
             "John" : 0,
             "Doe" : 0,
         }
+        self.timeLeft = 15
         
         # Menu Screen
         # allow screen size to be changed
@@ -88,7 +92,7 @@ class Menu:
         
         self.wait['notify'] = TextClass.Text(
             Constant.AMATICSC_FONT,
-            Constant.RED,
+            Constant.GREEN,
             16,
             "1/5",
             (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 + self.screenHeight * 10 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
@@ -119,14 +123,14 @@ class Menu:
                 Constant.WHITE,
                 16,
                 player,
-                (self.screenWidth / 20, self.screenHeight / 10 + (i + 1) * 25, 0, 0),
+                (self.screenWidth / 20, self.screenHeight / 10 + (i + 1) * 30, 0, 0),
             ),
               TextClass.Text(
                 Constant.AMATICSC_FONT,
                 Constant.WHITE,
                 16,
                 ": " + str(score),
-                (self.screenWidth / 8, self.screenHeight / 10 + (i + 1) * 25, 0, 0),
+                (self.screenWidth / 8, self.screenHeight / 10 + (i + 1) * 30, 0, 0),
             ))
                 )
         
@@ -155,6 +159,14 @@ class Menu:
             "Time",
             (self.screenWidth * 9 / 10, self.screenHeight / 10, 0, 0),
             True
+        )
+        
+        self.game['Timer'] = TextClass.Text(
+            Constant.AMATICSC_FONT,
+            Constant.WHITE,
+            20,
+            str(self.timeLeft),
+            (self.screenWidth * 9 / 10, self.screenHeight / 10 + 30, 0, 0),
         )
 
         # Start Button
@@ -244,13 +256,20 @@ class Menu:
                     exit(0)
                 case pygame.MOUSEBUTTONDOWN:
                     pos = pygame.mouse.get_pos()
+                case pygame.USEREVENT:
+                    if self.timeLeft and not self.submit:
+                        self.timeLeft -= 1
+                        self.game['Timer'].changeTextContent(str(self.timeLeft))
         self.gameScreen.blit(self.inGameImage, (0, 0))
         for element in self.game.values():
             element.draw(self.gameScreen)
         for btn in self.btns:
             btn.draw(self.gameScreen)
             if pos:
-                collision = btn.collision(pos) 
+                if btn.collision(pos):
+                    self.submit = True
+        if self.timeLeft == 0:
+            self.submit = True
         for i in range(len(self.word)):
             x = self.screenWidth // 2 - ((18 * len(self.word)) // 2)
             x1, y1 = (x + 20 * i,self.screenHeight // 2)
@@ -287,6 +306,7 @@ class Menu:
         pygame.display.update()
     
     def run(self):
+        pygame.time.set_timer(pygame.USEREVENT, 1000)
         while self.running:
             self.clock.tick(Constant.FPS)
             match self.ScreenView:
