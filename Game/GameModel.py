@@ -25,6 +25,7 @@ class GameModel:
         self.watchers = []
         self.timeout = 20
         self.status = GameStatus.OFF
+        self.guessedCharacters = []
 
         self.rules = self.getStoredGameInformation()
 
@@ -95,6 +96,22 @@ class GameModel:
             self.players.getFormattedSummary(),
             self.quizList.getFormattedSummary()
         ])
+    
+    def getJSONSummary(self) -> dict:
+        result = {
+            "round_count": self.roundCount,
+            "player": self.players.getJSONSummary(),
+            "quiz": self.quizList.getJSONSummary(),
+            "guessed_characters": self.guessedCharacters
+        }
+
+        return result
+    
+    def sendBroadcastedSummary(self) -> None:
+        self.broadcastResponse(Response(
+            statusCode = ResponseStatusCode.BROADCASTED_SUMMARY,
+            content = json.dumps(self.getJSONSummary())
+        ))
     
     def broadcastSummary(self) -> None:
         self.broadcastResponse(Response(
@@ -192,6 +209,7 @@ class GameModel:
                 return True
         
         self.broadcastSummary()
+        self.sendBroadcastedSummary()
 
         self.requireCurrentPlayerAnswer()
 

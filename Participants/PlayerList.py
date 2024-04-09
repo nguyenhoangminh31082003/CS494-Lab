@@ -65,6 +65,23 @@ class PlayerList:
 
         return "\n".join(resultLines)
     
+    def getJSONSummary(self) -> dict:
+        result = {
+            "current_player": self.players[self.currentID].getNickname(),
+            "player_count": len(self.players),
+            "play_information": []
+        }
+
+        for i, player in enumerate(self.players):
+            result["play_information"].append({
+                "order": i,
+                "nickname": player.getNickname(),
+                "points": player.score,
+                "alive": player.isAlive()
+            })
+
+        return result
+
     def getRankSummary(self) -> str:
         winners = []
         playerCount = len(self.players)

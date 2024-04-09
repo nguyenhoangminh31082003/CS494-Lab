@@ -110,6 +110,7 @@ class ServerModel:
     def startGame(self):
         if self.game.startNewGame():
             self.game.broadcastSummary()
+            self.game.sendBroadcastedSummary()
             self.game.requireCurrentPlayerAnswer()
 
     def handleNicknameRequest(self, participant : ParticipantModel, nickname : str) -> bool:
