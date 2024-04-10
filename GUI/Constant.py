@@ -1,5 +1,14 @@
 from pygame import image
 
+
+# enum for screen view
+class ScreenView:
+    REGISTER = 0
+    WAIT = 1
+    GAME = 2
+    LOSE = 3
+    STAT = 4
+
 WIDTH, HEIGHT   = 1300, 600
 ROW, COL        = 20, 20
 LINE_SIZE       = 30
@@ -10,6 +19,7 @@ MAX_DOT         = 3
 TEXT_SIZE       = 30
 AVG_TEXT_SIZE   = 12
 FPS             = 60
+SCREEN_RATIO    = 0.5
 
 BLANK_WORD              = '!@~'
 PAUSE_TEXT              = 'Waiting for other players...'
@@ -17,7 +27,7 @@ END_TEXT                = 'END GAME'
 ENTER_NICKNAME          = 'Enter your nickname:'
 ERROR_MESSAGE_REGISTER  = 'Someone has already used this nickname'
 INVALID_MESSAGE_REGISTER  = 'Invalid nickname'
-
+TITLE                   = 'Magic Wheel'   
 STATE_REGISTER              = 0
 STATE_COMPLETE_REGISTER     = 1
 STATE_PLAY_LETTER           = 2

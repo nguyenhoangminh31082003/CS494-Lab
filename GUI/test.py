@@ -6,5 +6,5 @@ pygame.init()
 infoObject = pygame.display.Info()
 screenProportion = 1/2
 
-menuGame = MenuClass.Menu((infoObject.current_w * screenProportion, infoObject.current_h * screenProportion))
+menuGame = MenuClass.GUI()
 menuGame.run()
