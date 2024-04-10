@@ -52,7 +52,7 @@ class GameGUI:
 
         self.scoreboard.clear()
 
-        playerInformation = self.summary["players"]["player_information"]
+        playerInformation = self.summary["player"]["player_information"]
 
         for i, player in enumerate(playerInformation):
             self.scoreboard.append(
@@ -276,8 +276,7 @@ class GameGUI:
                 if event.key == pygame.K_RETURN:
                     if self.validateNickname():
                         self.nickname = self.openScreenComponents['nickname'].getText()
-                        self.waitScreenComponents['hello'].changeTextContent(f"Hello, {self.nickname}!")
-                        self.screenViewID = ScreenViewID.WAIT
+                        self.client.requestNickname(self.nickname)
                         return
                 self.openScreenComponents['notify'].changeTextContent("")
                 self.openScreenComponents['nickname'].addText(event.unicode)
@@ -347,18 +346,24 @@ class GameGUI:
         if self.timeLeft == 0:
             self.submit = True
 
-        for i in range(len(self.word)):
-            x = self.screenWidth // 2 - ((18 * len(self.word)) // 2)
-            x1, y1 = (x + 20 * i,self.screenHeight // 2)
+        word = self.summary["quiz"]["current_keyword"]
+        wordLength = len(word)
+
+        for i in range(wordLength):
+            x = self.screenWidth // 2 - ((18 * wordLength) // 2)
+            x1, y1 = (x + 20 * i, self.screenHeight // 2)
             x2, y2 = (x + 20 * i + 15, self.screenHeight // 2)
             pygame.draw.line(self.screen, ColorCodeTuples.WHITE, (x1, y1), (x2, y2), 2)
         
-        for i in range(len(self.players_List)):
-            self.players[i][0].drawLeftToRight(self.screen)
-            self.players[i][1].drawLeftToRight(self.screen)
-            if i == self.turn: 
-                self.players[i][0].changeColor(ColorCodeTuples.GREEN)
-                self.players[i][1].changeColor(ColorCodeTuples.GREEN)
+        playerInformation = self.summary["player"]["player_information"]
+        currentPlayerNickname = self.summary["player"]["current_player"]
+
+        for i, player in enumerate(playerInformation):
+            self.scoreboard[i][0].drawLeftToRight(self.screen)
+            self.scoreboard[i][1].drawLeftToRight(self.screen)
+            if player["nickname"] == currentPlayerNickname: 
+                self.scoreboard[i][0].changeColor(ColorCodeTuples.GREEN)
+                self.scoreboard[i][1].changeColor(ColorCodeTuples.GREEN)
     
     def displayLoseScreen(self):
         for event in pygame.event.get():
@@ -388,7 +393,7 @@ class GameGUI:
         
         if response is None:
             return False
-        
+
         statusCode = response.getStatusCode()
         content = response.getContent()
 
@@ -398,6 +403,8 @@ class GameGUI:
         elif statusCode == ResponseStatusCode.NICKNAME_ACCEPTED:
             self.screenViewID = ScreenViewID.WAIT
             self.waitScreenComponents['hello'].changeTextContent(f"Hello, {self.nickname}!")
+        elif statusCode == ResponseStatusCode.GAME_STARTED:
+            self.screenViewID = ScreenViewID.GAME
 
         return True
 

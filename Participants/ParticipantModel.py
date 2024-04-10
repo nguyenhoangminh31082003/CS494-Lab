@@ -60,11 +60,15 @@ class ParticipantModel:
 
             message = self.responses.get().toString().encode("utf-8")
 
-            #Somehow we need this line to avoid an error at client when client tries to deserialize the message
-            print(f"[SERVER] Sending response to {self.nickname} ({self.address}): {message}")
+            length = len(message)
+
+            message += b" " * (1024 - length)
 
             try:
                 socket.sendall(message)
+
+                print(f"[SERVER] Sent message: {message}")
+         
             except:
                 return False
             

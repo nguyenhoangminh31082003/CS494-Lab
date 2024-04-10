@@ -66,12 +66,23 @@ class GameModel:
         self.status = GameStatus.READY
         self.quizList.chooseRandomQuiz()
 
-    def startNewGame(self) -> bool:
+    def startNewMatch(self) -> bool:
 
         if self.players.countSuccessfullyRegisteredPlayers() < self.rules["required_number_of_players"]:
             return False
 
         self.status = GameStatus.RUNNING
+
+        self.sendBroadcastedSummary()
+            
+        self.broadcastSummary()
+        
+        self.requireCurrentPlayerAnswer()
+    
+        self.broadcastResponse(Response(
+            statusCode = ResponseStatusCode.GAME_STARTED,
+            content = "Game started!!!"
+        ))
     
         return True
 

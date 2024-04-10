@@ -12,11 +12,19 @@ class Response(Message):
 
     @staticmethod
     def getDeserializedResponse(data : str):
-        dictionary = json.loads(data)
-        response = Response(
-            statusCode = ResponseStatusCode(dictionary["status_code"]), 
-            content = dictionary["content"]
-        )
-        return response
+        try:
+            dictionary = json.loads(data)
+            response = Response(
+                statusCode = ResponseStatusCode(dictionary["status_code"]), 
+                content = dictionary["content"]
+            )
+            return response
+        except:
+            
+            print("ERROR IN DESERIALIZING\n", data)
+
+            return None
+        
+        return None
 
     

@@ -109,12 +109,6 @@ class ServerModel:
             content="You need a nickname to continue the game"
         ))
 
-    def startGame(self):
-        if self.game.startNewGame():
-            self.game.broadcastSummary()
-            self.game.sendBroadcastedSummary()
-            self.game.requireCurrentPlayerAnswer()
-
     def handleNicknameRequest(self, participant : ParticipantModel, nickname : str) -> bool:
         if not ParticipantModel.checkNicknameValid(nickname):
             participant.addResponse(Response(
@@ -146,7 +140,7 @@ class ServerModel:
 
         print(f"[SERVER] Player with address {participant.address} has set the nickname as {nickname}")
 
-        self.startGame()
+        self.game.startNewMatch()
 
         return True
 
@@ -158,7 +152,11 @@ class ServerModel:
             receivedData = participantSocket.recv(1024)
 
             if receivedData:
-                request = Request.getDeserializedRequest(receivedData.decode(self.rules["format"]))
+                receivedData = receivedData.decode().strip()
+
+                print(f"[SERVER] Received data: {receivedData}")
+
+                request = Request.getDeserializedRequest(receivedData)
 
                 statusCode = request.getStatusCode()
                 content = request.getContent()

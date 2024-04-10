@@ -25,7 +25,15 @@ class ClientModel:
         self.clientSocket.connect((host, port))
 
     def sendRequest(self, request : Request) -> None:
-        self.clientSocket.send(request.toString().encode())
+        message = request.toString().encode("utf-8")
+
+        length = len(message)
+
+        message += b" " * (1024 - length)
+
+        self.clientSocket.send(message)
+
+        print(f"[CLIENT] Sent data: {request.toString()}")
 
     def closeConnection(self):
         self.clientSocket.close()
@@ -35,14 +43,24 @@ class ClientModel:
 
     def listen(self):
         while True:
-            receivedData = self.clientSocket.recv(1024).decode()
+            receivedData = self.clientSocket.recv(1024).decode().strip()
             
             if receivedData:
+
+                print(f"[CLIENT] Received data: {receivedData}")
+
                 self.receivedResponses.put(Response.getDeserializedResponse(receivedData))
 
     def getReceivedResponse(self):
 
         if not self.receivedResponses.empty():   
+
+            response = self.receivedResponses.get()
+
+            print(f"!!![CLIENT] Returning response: {response.toString()}")
+
+            return response 
+
             return self.receivedResponses.get()
         
         return None
