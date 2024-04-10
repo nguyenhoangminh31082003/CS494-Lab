@@ -2,8 +2,8 @@ import threading
 import socket
 import queue
 import json
-import re
 import sys
+import re
 
 sys.path.append("../")
 sys.path.append("./Message/")
@@ -18,7 +18,6 @@ class ClientModel:
     def __init__(self):
         self.clientSocket = None
         self.nickname = None
-        self.summary = None
         self.receivedResponses = queue.Queue()  
         
     def connectToServer(self, host : str, port : int) -> None:
@@ -31,6 +30,9 @@ class ClientModel:
     def closeConnection(self):
         self.clientSocket.close()
 
+    def requestNickname(self, nickname : str) -> None:
+        self.sendRequest(Request(RequestStatusCode.NICKNAME_REQUEST, nickname))
+
     def listen(self):
         while True:
             receivedData = self.clientSocket.recv(1024).decode()
@@ -40,7 +42,7 @@ class ClientModel:
 
     def getReceivedResponse(self):
 
-        if not self.receivedResponses.empty():
+        if not self.receivedResponses.empty():   
             return self.receivedResponses.get()
         
         return None

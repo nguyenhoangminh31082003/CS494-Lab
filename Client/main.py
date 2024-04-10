@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
     serverAddress = ServerModel.getStoredServerInformation()
     client = ClientModel()
-    gameUI = GameGUI()
+    gameUI = GameGUI(client)
     
     client.connectToServer(serverAddress["host"], serverAddress["port"])
 

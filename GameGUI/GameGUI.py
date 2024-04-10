@@ -3,10 +3,14 @@ import json
 import sys
 import os
 
-sys.path.append("Client/")
+sys.path.append("./Client/")
+sys.path.append("./Message/")
 
+from ResponseStatusCode import ResponseStatusCode
 from ScreenViewID import ScreenViewID
 from ClientModel import ClientModel
+from TextButton import TextButton
+from Response import Response
 from TextForm import TextForm
 from TextBox import TextBox
 import MessageTextConstants
@@ -16,7 +20,7 @@ import AssetConstants
 
 class GameGUI:
     
-    def __init__(self):
+    def __init__(self, client: ClientModel):
         self.screenViewID = ScreenViewID.REGISTER
         self.information = None
         self.running = False
@@ -32,6 +36,52 @@ class GameGUI:
         self.loseScreenComponents = dict()
         self.statisticScreenComponents = dict()
 
+        self.buttons = []
+
+        self.client = client
+        self.scoreboard = []
+
+        self.summary = None
+
+        self.timeLeft = 15
+
+    def bindSummaryUI(self) -> bool:
+
+        if self.summary is None:
+            return False
+
+        self.scoreboard.clear()
+
+        playerInformation = self.summary["players"]["player_information"]
+
+        for i, player in enumerate(playerInformation):
+            self.scoreboard.append(
+                (
+                    TextBox(
+                        textFont = AssetConstants.AMATICSC_FONT,
+                        textColor = ColorCodeTuples.WHITE,
+                        textSize = 16,
+                        textContent = player["nickname"],
+                        containerInfo = (
+                            self.screenWidth / 20, 
+                            self.screenHeight / 10 + (i + 1) * 30, 0, 0
+                        )
+                    ),
+                    TextBox(
+                        textFont = AssetConstants.AMATICSC_FONT,
+                        textColor = ColorCodeTuples.WHITE,
+                        textSize = 16,
+                        textContent = f": {player['points']}",
+                        containerInfo = (
+                            self.screenWidth / 8, 
+                            self.screenHeight / 10 + (i + 1) * 30, 0, 0
+                        ),
+                    )
+                )
+            )
+
+        return True
+
     def initializeScreenComponents(self):
         containerBoxContainer = (
             self.screenWidth * 350 / 1000, 
@@ -40,7 +90,7 @@ class GameGUI:
             self.screenHeight * 332 / 563
         )
 
-        self.open['label'] = TextBox(
+        self.openScreenComponents['label'] = TextBox(
             AssetConstants.AMATICSC_FONT,
             ColorCodeTuples.BLACK,
             32,
@@ -48,7 +98,7 @@ class GameGUI:
             (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
         )
         
-        self.wait['hello'] = TextBox(
+        self.waitScreenComponents['hello'] = TextBox(
             AssetConstants.AMATICSC_FONT,
             ColorCodeTuples.BLACK,
             32,
@@ -56,7 +106,7 @@ class GameGUI:
             (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 - self.screenHeight * 20 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
         )
         
-        self.wait['label'] = TextBox(
+        self.waitScreenComponents['label'] = TextBox(
             AssetConstants.AMATICSC_FONT,
             ColorCodeTuples.BLACK,
             32,
@@ -64,7 +114,7 @@ class GameGUI:
             (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
         )
         
-        self.open['notify'] = TextBox(
+        self.openScreenComponents['notify'] = TextBox(
             AssetConstants.AMATICSC_FONT,
             ColorCodeTuples.WHITE,
             20,
@@ -72,7 +122,7 @@ class GameGUI:
             (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 + self.screenHeight * 6 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
         )
         
-        self.wait['notify'] = TextBox(
+        self.waitScreenComponents['notify'] = TextBox(
             AssetConstants.AMATICSC_FONT,
             ColorCodeTuples.GREEN,
             16,
@@ -81,7 +131,7 @@ class GameGUI:
         )
         
         # Nickname TextForm
-        self.open['nickname'] = TextForm(
+        self.openScreenComponents['nickname'] = TextForm(
             AssetConstants.AMATICSC_FONT,
             ColorCodeTuples.BLACK,
             20,
@@ -92,29 +142,9 @@ class GameGUI:
             text = f"{chr(65+i)}"
             x = containerBoxContainer[0] - self.screenWidth * 1 / 10 + ( i % 9 ) * 36
             y = containerBoxContainer[1] + self.screenHeight * 28 / 100 + (i // 9) * 36
-            self.btns.append(Button.TextButton(text, x, y))
+            self.buttons.append(TextButton(text, x, y))
         
-        for i in range(len(self.players_List)):
-            player = list(self.players_List.keys())[i]
-            score = list(self.players_List.values())[i]
-            self.players.append((
-                TextBox.Text(
-                AssetConstants.AMATICSC_FONT,
-                ColorCodeTuples.WHITE,
-                16,
-                player,
-                (self.screenWidth / 20, self.screenHeight / 10 + (i + 1) * 30, 0, 0),
-            ),
-              TextBox.Text(
-                AssetConstants.AMATICSC_FONT,
-                ColorCodeTuples.WHITE,
-                16,
-                ": " + str(score),
-                (self.screenWidth / 8, self.screenHeight / 10 + (i + 1) * 30, 0, 0),
-            ))
-                )
-        
-        self.game['round'] = TextBox.Text(
+        self.gameScreenComponents['round'] = TextBox(
             AssetConstants.AMATICSC_FONT,
             ColorCodeTuples.WHITE,
             30,
@@ -123,7 +153,7 @@ class GameGUI:
             True
         )
         
-        self.game['player'] = TextBox.Text(
+        self.gameScreenComponents['player'] = TextBox(
             AssetConstants.AMATICSC_FONT,
             ColorCodeTuples.WHITE,
             20,
@@ -132,7 +162,7 @@ class GameGUI:
             True
         )
         
-        self.game['Time'] = TextBox.Text(
+        self.gameScreenComponents['Time'] = TextBox(
             AssetConstants.AMATICSC_FONT,
             ColorCodeTuples.WHITE,
             20,
@@ -141,7 +171,7 @@ class GameGUI:
             True
         )
         
-        self.game['Timer'] = TextBox.Text(
+        self.gameScreenComponents['Timer'] = TextBox(
             AssetConstants.AMATICSC_FONT,
             ColorCodeTuples.WHITE,
             20,
@@ -149,9 +179,9 @@ class GameGUI:
             (self.screenWidth * 9 / 10, self.screenHeight / 10 + 30, 0, 0),
         )
 
-        self.open['playButton'] = Button(
+        self.openScreenComponents['playButton'] = Button(
             (self.screenWidth * 8 / 100, self.screenWidth * 8 / 100),
-            MessageTextConstants.PLAY_BUTTON,
+            AssetConstants.PLAY_BUTTON,
             (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 + self.screenHeight * 25 / 100, containerBoxContainer[2], self.screenHeight - (containerBoxContainer[1] + containerBoxContainer[3]))
         )
 
@@ -197,6 +227,8 @@ class GameGUI:
 
         self.initializeScreenComponents()
 
+        self.bindSummaryUI()
+
     @staticmethod
     def getGUIInformation() -> dict:
         fileName = "./Data/GUI_information.json"
@@ -228,8 +260,8 @@ class GameGUI:
             element.resize(containerBoxContainer, elementSize)
 
     def validateNickname(self):
-        if self.open['nickname'].getText() == "":
-            self.open['notify'].changeTextContent(MessageTextConstants.INVALID_MESSAGE_REGISTER)
+        if self.openScreenComponents['nickname'].getText() == "":
+            self.openScreenComponents['notify'].changeTextContent(MessageTextConstants.INVALID_MESSAGE_REGISTER)
             return False
         return True
 
@@ -244,135 +276,130 @@ class GameGUI:
                 if event.key == pygame.K_RETURN:
                     if self.validateNickname():
                         self.nickname = self.openScreenComponents['nickname'].getText()
-                        self.waitScreenComponents['hello'].changeTextContent("Hello, " + self.nickname + "!")
+                        self.waitScreenComponents['hello'].changeTextContent(f"Hello, {self.nickname}!")
                         self.screenViewID = ScreenViewID.WAIT
                         return
                 self.openScreenComponents['notify'].changeTextContent("")
                 self.openScreenComponents['nickname'].addText(event.unicode)
           
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_presses = pygame.mouse.get_pressed()
+                mousePresses = pygame.mouse.get_pressed()
             elif pygame.VIDEORESIZE:
                 pass
 
-    @staticmethod
-    def registerScreen():
-        for event in pygame.event.get():
-            match event.type:
-                case pygame.QUIT:
-                    GUI.running = False
-                    pygame.quit()
-                    exit(0)
-                case pygame.KEYDOWN:
-                    # if the key is enter, validate the nickname
-                    if event.key == pygame.K_RETURN:
-                        if GUI.validateNickname():
-                            GUI.nickname = GUI.open['nickname'].getText()
-                            GUI.wait['hello'].changeTextContent("Hello, " + GUI.nickname + "!")
-                            GUI.ScreenView = Constant.ScreenView.WAIT
-                            return
-                    GUI.open['notify'].changeTextContent("")
-                    GUI.open['nickname'].addText(event.unicode)
-                case pygame.MOUSEBUTTONDOWN:
-                    mouse_presses = pygame.mouse.get_pressed()
-                # when the screen is resized, scale the open
-                case pygame.VIDEORESIZE:
-                    # GUI.resize()
-                    pass
+        startButtonState = self.openScreenComponents['playButton'].isClicked()
 
-        # Start Button Process
-        startButtonState = GUI.open['playButton'].isClicked()
+        if startButtonState:
+            if self.validateNickname():
+                self.nickname = self.openScreenComponents['nickname'].getText()
+                self.client.requestNickname(self.nickname)
+        
+        self.screen.blit(self.backgroundImage, (0, 0))
 
-        if startButtonState == True:
-            if GUI.validateNickname():
-                GUI.nickname = GUI.open['nickname'].getText()
-                GUI.wait['hello'].changeTextContent("Hello, " + GUI.nickname + "!")
-                GUI.ScreenView = Constant.ScreenView.WAIT
-        # Draw Window
-        GUI.gameScreen.blit(GUI.backgroundImage, (0, 0))
-        for element in GUI.open.values():
-            element.draw(GUI.gameScreen)
-        pygame.display.update()
+        for element in self.openScreenComponents.values():
+            element.draw(self.screen)
     
-    @staticmethod
-    def waitScreen():
+    def displayWaitScreen(self):
         for event in pygame.event.get():
-            match event.type:
-                case pygame.QUIT:
-                    GUI.running = False
-                    pygame.quit()
-                    exit(0)
-                case pygame.MOUSEBUTTONDOWN:
-                    GUI.ScreenView = Constant.ScreenView.GAME
-        GUI.gameScreen.blit(GUI.inGameImage, (0, 0))
-        for element in GUI.wait.values():
-            element.draw(GUI.gameScreen)
+            if event.type == pygame.QUIT:
+                self.running = False
+                pygame.quit()
+                return
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                self.screenViewID = ScreenViewID.GAME
+        
+        self.screen.blit(self.inGameImage, (0, 0))
+        
+        for element in self.waitScreenComponents.values():
+            element.draw(self.screen)
+
         pygame.display.update()
         
-    
-    @staticmethod
-    def matchScreen():
-        pos = None
+    def displayMatchScreen(self):
+
+        position = None
+        
         for event in pygame.event.get():
-            match event.type:
-                case pygame.QUIT:
-                    GUI.running = False
-                    pygame.quit()
-                    exit(0)
-                case pygame.MOUSEBUTTONDOWN:
-                    pos = pygame.mouse.get_pos()
-                case pygame.USEREVENT:
-                    if GUI.timeLeft and not GUI.submit:
-                        GUI.timeLeft -= 1
-                        GUI.game['Timer'].changeTextContent(str(GUI.timeLeft))
-        GUI.gameScreen.blit(GUI.inGameImage, (0, 0))
-        for element in GUI.game.values():
-            element.draw(GUI.gameScreen)
-        for btn in GUI.btns:
-            btn.draw(GUI.gameScreen)
-            if pos:
-                if btn.collision(pos):
-                    GUI.submit = True
-        if GUI.timeLeft == 0:
-            GUI.submit = True
-        for i in range(len(GUI.word)):
-            x = GUI.screenWidth // 2 - ((18 * len(GUI.word)) // 2)
-            x1, y1 = (x + 20 * i,GUI.screenHeight // 2)
-            x2, y2 = (x + 20 * i + 15, GUI.screenHeight // 2)
-            pygame.draw.line(GUI.gameScreen, Constant.WHITE, (x1, y1), (x2, y2), 2)
-        for i in range(len(GUI.players_List)):
-            GUI.players[i][0].drawLeftToRight(GUI.gameScreen)
-            GUI.players[i][1].drawLeftToRight(GUI.gameScreen)
-            if i == GUI.turn: 
-                GUI.players[i][0].changeColor(Constant.GREEN)
-                GUI.players[i][1].changeColor(Constant.GREEN)
-        pygame.display.update()
+            if event.type == pygame.QUIT:
+                self.running = False
+                pygame.quit()
+                return
+            elif pygame.MOUSEBUTTONDOWN:
+                position = pygame.mouse.get_pos()
+            elif pygame.USEREVENT:
+                if self.timeLeft and not self.submit:
+                    self.timeLeft -= 1
+                    self.gameScreenComponents['Timer'].changeTextContent(str(self.timeLeft))
+        
+        self.screen.blit(self.inGameImage, (0, 0))
+        
+        for element in self.gameScreenComponents.values():
+            element.draw(self.screen)
+
+        for button in self.buttons:
+            
+            button.draw(self.screen)
+            
+            if position:
+                if button.collision(position):
+                    self.submit = True
+
+        if self.timeLeft == 0:
+            self.submit = True
+
+        for i in range(len(self.word)):
+            x = self.screenWidth // 2 - ((18 * len(self.word)) // 2)
+            x1, y1 = (x + 20 * i,self.screenHeight // 2)
+            x2, y2 = (x + 20 * i + 15, self.screenHeight // 2)
+            pygame.draw.line(self.screen, ColorCodeTuples.WHITE, (x1, y1), (x2, y2), 2)
+        
+        for i in range(len(self.players_List)):
+            self.players[i][0].drawLeftToRight(self.screen)
+            self.players[i][1].drawLeftToRight(self.screen)
+            if i == self.turn: 
+                self.players[i][0].changeColor(ColorCodeTuples.GREEN)
+                self.players[i][1].changeColor(ColorCodeTuples.GREEN)
     
-    @staticmethod
-    def loseScreen():
+    def displayLoseScreen(self):
         for event in pygame.event.get():
-            match event.type:
-                case pygame.QUIT:
-                    GUI.running = False
-                    pygame.quit()
-                    exit(0)
-        GUI.gameScreen.blit(GUI.inGameImage, (0, 0))
-        for element in GUI.lose.values():
-            element.draw(GUI.gameScreen)
-        pygame.display.update()
-    
-    @staticmethod
-    def statScreen():
+            if event.type == pygame.QUIT:
+                self.running = False
+                pygame.quit()
+                return
+
+        self.screen.blit(self.inGameImage, (0, 0))
+        for element in self.loseScreenComponents.values():
+            element.draw(self.screen)
+        
+    def displayStatisticScreen(self):
         for event in pygame.event.get():
-            match event.type:
-                case pygame.QUIT:
-                    GUI.running = False
-                    pygame.quit()
-                    exit(0)
-        GUI.gameScreen.blit(GUI.inGameImage, (0, 0))
-        for element in GUI.stat.values():
-            element.draw(GUI.gameScreen)
-        pygame.display.update()
+            if event.type == pygame.QUIT:
+                self.running = False
+                pygame.quit()
+                return
+       
+        self.screen.blit(self.inGameImage, (0, 0))
+        
+        for element in self.statisticScreenComponents.values():
+            element.draw(self.screen)
+        
+    def analyzeResponse(self) -> bool:
+        response = self.client.getReceivedResponse()
+        
+        if response is None:
+            return False
+        
+        statusCode = response.getStatusCode()
+        content = response.getContent()
+
+        if statusCode == ResponseStatusCode.BROADCASTED_SUMMARY:
+            self.summary = json.loads(content)
+            self.bindSummaryUI()
+        elif statusCode == ResponseStatusCode.NICKNAME_ACCEPTED:
+            self.screenViewID = ScreenViewID.WAIT
+            self.waitScreenComponents['hello'].changeTextContent(f"Hello, {self.nickname}!")
+
+        return True
 
     def run(self):
         self.initialize()
@@ -382,9 +409,19 @@ class GameGUI:
         while self.running:
             self.clock.tick(self.information["frame_rate"])
 
+            self.analyzeResponse()
+
             if self.screenViewID == ScreenViewID.REGISTER:  
                 self.displayRegisterScreen()
-
+            elif self.screenViewID == ScreenViewID.WAIT:
+                self.displayWaitScreen()
+            elif self.screenViewID == ScreenViewID.GAME:
+                self.displayMatchScreen()
+            elif self.screenViewID == ScreenViewID.LOSE:
+                self.displayLoseScreen()
+            elif self.screenViewID == ScreenViewID.STATISTIC:
+                self.displayStatisticScreen()
+            
             if not self.running:
                 break
 
