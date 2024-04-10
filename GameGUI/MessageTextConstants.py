@@ -1,0 +1,6 @@
+BLANK_WORD              = '!@~'
+PAUSE_TEXT              = 'Waiting for other players...'
+END_TEXT                = 'END GAME'
+ENTER_NICKNAME          = 'Enter your nickname:'
+ERROR_MESSAGE_REGISTER  = 'Someone has already used this nickname'
+INVALID_MESSAGE_REGISTER  = 'Invalid nickname'

@@ -7,7 +7,11 @@ sys.path.append("Client/")
 
 from ScreenViewID import ScreenViewID
 from ClientModel import ClientModel
+from TextForm import TextForm
 from TextBox import TextBox
+import MessageTextConstants
+from Button import Button
+import ColorCodeTuples
 import AssetConstants
 
 class GameGUI:
@@ -19,6 +23,9 @@ class GameGUI:
         self.screen = None
         self.clock = None
 
+        self.screenWidth = None
+        self.screenHeight = None
+
         self.openScreenComponents = dict()
         self.waitScreenComponents = dict()
         self.gameScreenComponents = dict()
@@ -27,122 +34,142 @@ class GameGUI:
 
     def initializeScreenComponents(self):
         containerBoxContainer = (
-            GUI.screenWidth * 350 / 1000, GUI.screenHeight * 170 / 563, GUI.screenWidth * 332 / 1000, GUI.screenHeight * 332 / 563)
+            self.screenWidth * 350 / 1000, 
+            self.screenHeight * 170 / 563, 
+            self.screenWidth * 332 / 1000, 
+            self.screenHeight * 332 / 563
+        )
 
-        self.open['label'] = TextBox.Text(
+        self.open['label'] = TextBox(
             AssetConstants.AMATICSC_FONT,
-            AssetConstants.BLACK,
+            ColorCodeTuples.BLACK,
             32,
-            AssetConstants.ENTER_NICKNAME,
+            MessageTextConstants.ENTER_NICKNAME,
             (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
         )
         
-        GUI.wait['hello'] = TextClass.Text(
-            Constant.AMATICSC_FONT,
-            Constant.BLACK,
+        self.wait['hello'] = TextBox(
+            AssetConstants.AMATICSC_FONT,
+            ColorCodeTuples.BLACK,
             32,
             "Hello, ",
-            (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 - GUI.screenHeight * 20 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
+            (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 - self.screenHeight * 20 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
         )
         
-        GUI.wait['label'] = TextClass.Text(
-            Constant.AMATICSC_FONT,
-            Constant.BLACK,
+        self.wait['label'] = TextBox(
+            AssetConstants.AMATICSC_FONT,
+            ColorCodeTuples.BLACK,
             32,
-            Constant.PAUSE_TEXT,
+            MessageTextConstants.PAUSE_TEXT,
             (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
         )
         
-        GUI.open['notify'] = TextClass.Text(
-            Constant.AMATICSC_FONT,
-            Constant.WHITE,
+        self.open['notify'] = TextBox(
+            AssetConstants.AMATICSC_FONT,
+            ColorCodeTuples.WHITE,
             20,
             "",
-            (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 + GUI.screenHeight * 6 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
+            (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 + self.screenHeight * 6 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
         )
         
-        GUI.wait['notify'] = TextClass.Text(
-            Constant.AMATICSC_FONT,
-            Constant.GREEN,
+        self.wait['notify'] = TextBox(
+            AssetConstants.AMATICSC_FONT,
+            ColorCodeTuples.GREEN,
             16,
             "1/5",
-            (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 + GUI.screenHeight * 10 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
+            (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 + self.screenHeight * 10 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
         )
         
         # Nickname TextForm
-        GUI.open['nickname'] = TextFormClass.TextForm(
-            Constant.AMATICSC_FONT,
-            Constant.BLACK,
+        self.open['nickname'] = TextForm(
+            AssetConstants.AMATICSC_FONT,
+            ColorCodeTuples.BLACK,
             20,
-            (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 + GUI.screenHeight * 13 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
+            (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 + self.screenHeight * 13 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
         )
         
         for i in range(26):
             text = f"{chr(65+i)}"
-            x = containerBoxContainer[0] - GUI.screenWidth * 1 / 10 + ( i % 9 ) * 36
-            y = containerBoxContainer[1] + GUI.screenHeight * 28 / 100 + (i // 9) * 36
-            GUI.btns.append(ButtonClass.TextButton(text, x, y))
+            x = containerBoxContainer[0] - self.screenWidth * 1 / 10 + ( i % 9 ) * 36
+            y = containerBoxContainer[1] + self.screenHeight * 28 / 100 + (i // 9) * 36
+            self.btns.append(Button.TextButton(text, x, y))
         
-        for i in range(len(GUI.players_List)):
-            player = list(GUI.players_List.keys())[i]
-            score = list(GUI.players_List.values())[i]
-            GUI.players.append((
-                TextClass.Text(
-                Constant.AMATICSC_FONT,
-                Constant.WHITE,
+        for i in range(len(self.players_List)):
+            player = list(self.players_List.keys())[i]
+            score = list(self.players_List.values())[i]
+            self.players.append((
+                TextBox.Text(
+                AssetConstants.AMATICSC_FONT,
+                ColorCodeTuples.WHITE,
                 16,
                 player,
-                (GUI.screenWidth / 20, GUI.screenHeight / 10 + (i + 1) * 30, 0, 0),
+                (self.screenWidth / 20, self.screenHeight / 10 + (i + 1) * 30, 0, 0),
             ),
-              TextClass.Text(
-                Constant.AMATICSC_FONT,
-                Constant.WHITE,
+              TextBox.Text(
+                AssetConstants.AMATICSC_FONT,
+                ColorCodeTuples.WHITE,
                 16,
                 ": " + str(score),
-                (GUI.screenWidth / 8, GUI.screenHeight / 10 + (i + 1) * 30, 0, 0),
+                (self.screenWidth / 8, self.screenHeight / 10 + (i + 1) * 30, 0, 0),
             ))
                 )
         
-        GUI.game['round'] = TextClass.Text(
-            Constant.AMATICSC_FONT,
-            Constant.WHITE,
+        self.game['round'] = TextBox.Text(
+            AssetConstants.AMATICSC_FONT,
+            ColorCodeTuples.WHITE,
             30,
             "Round: 1",
-            (containerBoxContainer[0], GUI.screenHeight / 10, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100),
+            (containerBoxContainer[0], self.screenHeight / 10, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100),
             True
         )
         
-        GUI.game['player'] = TextClass.Text(
-            Constant.AMATICSC_FONT,
-            Constant.WHITE,
+        self.game['player'] = TextBox.Text(
+            AssetConstants.AMATICSC_FONT,
+            ColorCodeTuples.WHITE,
             20,
             "Players:",
-            (GUI.screenWidth / 10, GUI.screenHeight / 10, 0, 0),
+            (self.screenWidth / 10, self.screenHeight / 10, 0, 0),
             True
         )
         
-        GUI.game['Time'] = TextClass.Text(
-            Constant.AMATICSC_FONT,
-            Constant.WHITE,
+        self.game['Time'] = TextBox.Text(
+            AssetConstants.AMATICSC_FONT,
+            ColorCodeTuples.WHITE,
             20,
             "Time",
-            (GUI.screenWidth * 9 / 10, GUI.screenHeight / 10, 0, 0),
+            (self.screenWidth * 9 / 10, self.screenHeight / 10, 0, 0),
             True
         )
         
-        GUI.game['Timer'] = TextClass.Text(
-            Constant.AMATICSC_FONT,
-            Constant.WHITE,
+        self.game['Timer'] = TextBox.Text(
+            AssetConstants.AMATICSC_FONT,
+            ColorCodeTuples.WHITE,
             20,
-            str(GUI.timeLeft),
-            (GUI.screenWidth * 9 / 10, GUI.screenHeight / 10 + 30, 0, 0),
+            str(self.timeLeft),
+            (self.screenWidth * 9 / 10, self.screenHeight / 10 + 30, 0, 0),
         )
 
-        # Start Button
-        GUI.open['playButton'] = ButtonClass.Button(
-            (GUI.screenWidth * 8 / 100, GUI.screenWidth * 8 / 100),
-            Constant.PLAY_BUTTON,
-            (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 + GUI.screenHeight * 25 / 100, containerBoxContainer[2], GUI.screenHeight - (containerBoxContainer[1] + containerBoxContainer[3]))
+        self.open['playButton'] = Button(
+            (self.screenWidth * 8 / 100, self.screenWidth * 8 / 100),
+            MessageTextConstants.PLAY_BUTTON,
+            (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 + self.screenHeight * 25 / 100, containerBoxContainer[2], self.screenHeight - (containerBoxContainer[1] + containerBoxContainer[3]))
+        )
+
+    def initializeImages(self):
+        self.backgroundImage = pygame.transform.scale(
+            AssetConstants.MENU, 
+            (
+                self.screenWidth, 
+                self.screenHeight
+            )
+        )
+
+        self.inGameImage = pygame.transform.scale(
+            AssetConstants.BACKGROUND, 
+            (
+                self.screenWidth, 
+                self.screenHeight
+            )
         )
 
     def initialize(self):
@@ -152,16 +179,23 @@ class GameGUI:
         
         pygame.display.set_caption(self.information["title"])
 
+        self.screenWidth = self.information["screen_size"]["width"]
+        self.screenHeight = self.information["screen_size"]["height"]
+
         self.screen = pygame.display.set_mode(
             (
-                self.information["screen_size"]["width"], 
-                self.information["screen_size"]["height"]
+                self.screenWidth,
+                self.screenHeight
             ),
             pygame.RESIZABLE
         )
 
         self.clock = pygame.time.Clock()
         self.running = True
+
+        self.initializeImages()
+
+        self.initializeScreenComponents()
 
     @staticmethod
     def getGUIInformation() -> dict:
@@ -178,6 +212,27 @@ class GameGUI:
         with open(fileName, "r") as file:
             return json.load(file)
 
+    def resize(self):
+        self.screenWidth, self.screenHeight = pygame.display.get_surface().get_size()
+        self.backgroundImage = pygame.transform.scale(
+            AssetConstants.MENU, 
+            (
+                self.screenWidth, 
+                self.screenHeight
+            )
+        )
+
+        containerBoxContainer = (self.screenWidth * 350 / 1000, self.screenHeight * 170 / 563, self.screenWidth * 332 / 1000, self.screenHeight * 332 / 563)
+        elementSize = (self.screenWidth * 8 / 100, self.screenWidth * 8 / 100)
+        for element in self.open.values():
+            element.resize(containerBoxContainer, elementSize)
+
+    def validateNickname(self):
+        if self.open['nickname'].getText() == "":
+            self.open['notify'].changeTextContent(MessageTextConstants.INVALID_MESSAGE_REGISTER)
+            return False
+        return True
+
     def displayRegisterScreen(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -185,8 +240,139 @@ class GameGUI:
                 pygame.quit()
                 return
             elif event.type == pygame.KEYDOWN:
+
                 if event.key == pygame.K_RETURN:
+                    if self.validateNickname():
+                        self.nickname = self.openScreenComponents['nickname'].getText()
+                        self.waitScreenComponents['hello'].changeTextContent("Hello, " + self.nickname + "!")
+                        self.screenViewID = ScreenViewID.WAIT
+                        return
+                self.openScreenComponents['notify'].changeTextContent("")
+                self.openScreenComponents['nickname'].addText(event.unicode)
+          
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_presses = pygame.mouse.get_pressed()
+            elif pygame.VIDEORESIZE:
+                pass
+
+    @staticmethod
+    def registerScreen():
+        for event in pygame.event.get():
+            match event.type:
+                case pygame.QUIT:
+                    GUI.running = False
+                    pygame.quit()
+                    exit(0)
+                case pygame.KEYDOWN:
+                    # if the key is enter, validate the nickname
+                    if event.key == pygame.K_RETURN:
+                        if GUI.validateNickname():
+                            GUI.nickname = GUI.open['nickname'].getText()
+                            GUI.wait['hello'].changeTextContent("Hello, " + GUI.nickname + "!")
+                            GUI.ScreenView = Constant.ScreenView.WAIT
+                            return
+                    GUI.open['notify'].changeTextContent("")
+                    GUI.open['nickname'].addText(event.unicode)
+                case pygame.MOUSEBUTTONDOWN:
+                    mouse_presses = pygame.mouse.get_pressed()
+                # when the screen is resized, scale the open
+                case pygame.VIDEORESIZE:
+                    # GUI.resize()
                     pass
+
+        # Start Button Process
+        startButtonState = GUI.open['playButton'].isClicked()
+
+        if startButtonState == True:
+            if GUI.validateNickname():
+                GUI.nickname = GUI.open['nickname'].getText()
+                GUI.wait['hello'].changeTextContent("Hello, " + GUI.nickname + "!")
+                GUI.ScreenView = Constant.ScreenView.WAIT
+        # Draw Window
+        GUI.gameScreen.blit(GUI.backgroundImage, (0, 0))
+        for element in GUI.open.values():
+            element.draw(GUI.gameScreen)
+        pygame.display.update()
+    
+    @staticmethod
+    def waitScreen():
+        for event in pygame.event.get():
+            match event.type:
+                case pygame.QUIT:
+                    GUI.running = False
+                    pygame.quit()
+                    exit(0)
+                case pygame.MOUSEBUTTONDOWN:
+                    GUI.ScreenView = Constant.ScreenView.GAME
+        GUI.gameScreen.blit(GUI.inGameImage, (0, 0))
+        for element in GUI.wait.values():
+            element.draw(GUI.gameScreen)
+        pygame.display.update()
+        
+    
+    @staticmethod
+    def matchScreen():
+        pos = None
+        for event in pygame.event.get():
+            match event.type:
+                case pygame.QUIT:
+                    GUI.running = False
+                    pygame.quit()
+                    exit(0)
+                case pygame.MOUSEBUTTONDOWN:
+                    pos = pygame.mouse.get_pos()
+                case pygame.USEREVENT:
+                    if GUI.timeLeft and not GUI.submit:
+                        GUI.timeLeft -= 1
+                        GUI.game['Timer'].changeTextContent(str(GUI.timeLeft))
+        GUI.gameScreen.blit(GUI.inGameImage, (0, 0))
+        for element in GUI.game.values():
+            element.draw(GUI.gameScreen)
+        for btn in GUI.btns:
+            btn.draw(GUI.gameScreen)
+            if pos:
+                if btn.collision(pos):
+                    GUI.submit = True
+        if GUI.timeLeft == 0:
+            GUI.submit = True
+        for i in range(len(GUI.word)):
+            x = GUI.screenWidth // 2 - ((18 * len(GUI.word)) // 2)
+            x1, y1 = (x + 20 * i,GUI.screenHeight // 2)
+            x2, y2 = (x + 20 * i + 15, GUI.screenHeight // 2)
+            pygame.draw.line(GUI.gameScreen, Constant.WHITE, (x1, y1), (x2, y2), 2)
+        for i in range(len(GUI.players_List)):
+            GUI.players[i][0].drawLeftToRight(GUI.gameScreen)
+            GUI.players[i][1].drawLeftToRight(GUI.gameScreen)
+            if i == GUI.turn: 
+                GUI.players[i][0].changeColor(Constant.GREEN)
+                GUI.players[i][1].changeColor(Constant.GREEN)
+        pygame.display.update()
+    
+    @staticmethod
+    def loseScreen():
+        for event in pygame.event.get():
+            match event.type:
+                case pygame.QUIT:
+                    GUI.running = False
+                    pygame.quit()
+                    exit(0)
+        GUI.gameScreen.blit(GUI.inGameImage, (0, 0))
+        for element in GUI.lose.values():
+            element.draw(GUI.gameScreen)
+        pygame.display.update()
+    
+    @staticmethod
+    def statScreen():
+        for event in pygame.event.get():
+            match event.type:
+                case pygame.QUIT:
+                    GUI.running = False
+                    pygame.quit()
+                    exit(0)
+        GUI.gameScreen.blit(GUI.inGameImage, (0, 0))
+        for element in GUI.stat.values():
+            element.draw(GUI.gameScreen)
+        pygame.display.update()
 
     def run(self):
         self.initialize()
