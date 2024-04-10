@@ -16,17 +16,11 @@ if __name__ == "__main__":
     
     client.connectToServer(serverAddress["host"], serverAddress["port"])
 
-    if True:
+    backendThread = threading.Thread(target=client.listen)
+    frontendThread = threading.Thread(target=gameUI.run)
 
-        #backendThread = threading.Thread(target=client.listen)
-        frontendThread = threading.Thread(target=gameUI.run)
+    backendThread.start()
+    frontendThread.start()
 
-        #backendThread.start()
-        frontendThread.start()
-
-        frontendThread.join()
-        #backendThread.join()
-
-    else:
-
-        gameUI.run()
+    frontendThread.join()
+    backendThread.join()

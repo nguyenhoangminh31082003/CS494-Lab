@@ -200,6 +200,7 @@ class GUI:
             match event.type:
                 case pygame.QUIT:
                     GUI.running = False
+                    pygame.quit()
                     exit(0)
                 case pygame.KEYDOWN:
                     # if the key is enter, validate the nickname
@@ -238,6 +239,7 @@ class GUI:
             match event.type:
                 case pygame.QUIT:
                     GUI.running = False
+                    pygame.quit()
                     exit(0)
                 case pygame.MOUSEBUTTONDOWN:
                     GUI.ScreenView = Constant.ScreenView.GAME
@@ -254,6 +256,7 @@ class GUI:
             match event.type:
                 case pygame.QUIT:
                     GUI.running = False
+                    pygame.quit()
                     exit(0)
                 case pygame.MOUSEBUTTONDOWN:
                     pos = pygame.mouse.get_pos()
@@ -290,6 +293,7 @@ class GUI:
             match event.type:
                 case pygame.QUIT:
                     GUI.running = False
+                    pygame.quit()
                     exit(0)
         GUI.gameScreen.blit(GUI.inGameImage, (0, 0))
         for element in GUI.lose.values():
@@ -302,6 +306,7 @@ class GUI:
             match event.type:
                 case pygame.QUIT:
                     GUI.running = False
+                    pygame.quit()
                     exit(0)
         GUI.gameScreen.blit(GUI.inGameImage, (0, 0))
         for element in GUI.stat.values():
