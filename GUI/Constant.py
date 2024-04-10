@@ -1,3 +1,4 @@
+import os
 from pygame import image
 
 
@@ -47,7 +48,6 @@ PINK    = (255, 192, 203)
 AQUA    = (175, 238, 238)
 GREEN   = (152, 251, 152)
 
-import os
 IMAGE_PATH  = os.path.join(os.getcwd(), 'Assets')
 BACKGROUND  = image.load(os.path.join(IMAGE_PATH, 'background.png'))
 MENU        = image.load(os.path.join(IMAGE_PATH, 'menu.png'))

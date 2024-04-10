@@ -1,7 +1,9 @@
 import pygame
 import threading
 import sys
+
 sys.path.append('./Game/')
+
 from Constant import *
 
 class GUI:
