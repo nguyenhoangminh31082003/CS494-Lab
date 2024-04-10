@@ -6,6 +6,7 @@ sys.path.append("Client/")
 import Constant
 import TextClass
 import ButtonClass
+import TextFormClass
 from ClientModel import ClientModel
 
 class GameGUI:
@@ -108,7 +109,7 @@ class GameGUI:
         )
         
         # Nickname TextForm
-        self.open['nickname'] = TextClass.TextForm(
+        self.open['nickname'] = TextFormClass.TextForm(
             Constant.AMATICSC_FONT,
             Constant.BLACK,
             20,

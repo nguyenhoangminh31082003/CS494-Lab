@@ -2,6 +2,7 @@ import pygame
 import Constant
 import TextClass
 import ButtonClass
+import TextFormClass
 
 class GUI:
     ScreenView = 0
@@ -96,7 +97,7 @@ class GUI:
         )
         
         # Nickname TextForm
-        GUI.open['nickname'] = TextClass.TextForm(
+        GUI.open['nickname'] = TextFormClass.TextForm(
             Constant.AMATICSC_FONT,
             Constant.BLACK,
             20,

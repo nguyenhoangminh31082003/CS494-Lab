@@ -23,7 +23,7 @@ class QuizList:
         return result
 
     def readQuizzes(self) -> None:
-        with open("data.txt", "r") as file:
+        with open("Data/data.txt", "r") as file:
             self.quizzes.clear()
 
             wordCount = int(file.readline())
