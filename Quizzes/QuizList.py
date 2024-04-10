@@ -12,6 +12,16 @@ class QuizList:
         self.readQuizzes()
         self.currentQuiz = None
     
+    def getJSONSummary(self) -> dict:
+
+        result = {
+            "keyword_length": self.currentQuiz.getKeywordLength(),
+            "current_keyword": self.currentQuiz.getCurrentKeyword(),
+            "hint": self.currentQuiz.getQuestion()
+        }
+
+        return result
+
     def readQuizzes(self) -> None:
         with open("data.txt", "r") as file:
             self.quizzes.clear()

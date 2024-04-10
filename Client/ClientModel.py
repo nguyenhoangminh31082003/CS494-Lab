@@ -1,8 +1,9 @@
 import threading
 import socket
 import json
-
+import re
 import sys
+
 sys.path.append("../")
 sys.path.append("./Message/")
 
@@ -15,6 +16,8 @@ class ClientModel:
 
     def __init__(self):
         self.clientSocket = None
+        self.nickname = None
+        self.summary = None
         
     def connectToServer(self, host : str, port : int) -> None:
         self.clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -28,19 +31,19 @@ class ClientModel:
             print(content)
             return
 
-        nickname = None
+        self.nickname = None
                 
         if statusCode == ResponseStatusCode.NICKNAME_REQUIREMENT:
-            nickname = input("Please enter your nickname: ")
+            self.nickname = input("Please enter your nickname: ")
         elif statusCode == ResponseStatusCode.INVALID_NICKNAME:
-            nickname = input("The chosen nickname is not valid. Please enter a valid nickname: ")
+            self.nickname = input("The chosen nickname is not valid. Please enter a valid nickname: ")
         elif statusCode == ResponseStatusCode.NICKNAME_ALREADY_TAKEN:
-            nickname = input("The chosen nickname is already taken. Please enter another nickname: ")
+            self.nickname = input("The chosen nickname is already taken. Please enter another nickname: ")
                 
-        if nickname is not None:
+        if self.nickname is not None:
             self.sendRequest(Request(
                 statusCode = RequestStatusCode.NICKNAME_REQUEST, 
-                content = nickname
+                content = self.nickname
             ))
 
     def handleAnswerSubmission(self, turnDetails: dict) -> None:
@@ -78,6 +81,9 @@ class ClientModel:
                     self.handleRegistration(statusCode, content)        
                 elif statusCode == ResponseStatusCode.BROADCASTED_MESSAGE:
                     print(content)
+                elif statusCode == ResponseStatusCode.BROADCASTED_SUMMARY:
+                    self.summary = json.loads(content)
+                    #print(json.dumps(self.summary, indent = 4))
                 elif statusCode == ResponseStatusCode.GAME_FULL:
                     print(content)
                     #This block might be changed in the future
