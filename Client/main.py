@@ -1,34 +1,32 @@
 import sys
-import json
 import threading
 
-sys.path.append("./GUI/")
 sys.path.append("./Server/")
-sys.path.append("./Message/")
+sys.path.append("./GameGUI/")
 
-import Constant 
-from GameGUI import GameGUI
-from Request import Request
-from Response import Response
 from ClientModel import ClientModel
 from ServerModel import ServerModel
-from RequestStatusCode import RequestStatusCode
-from ResponseStatusCode import ResponseStatusCode
-
+from GameGUI import GameGUI
 
 if __name__ == "__main__":
 
     serverAddress = ServerModel.getStoredServerInformation()
     client = ClientModel()
-    gui = GameGUI(client)
+    gameUI = GameGUI()
     
     client.connectToServer(serverAddress["host"], serverAddress["port"])
 
-    backendThread = threading.Thread(target=client.listen)
-    guiThread = threading.Thread(target=gui.run)
+    if True:
 
-    backendThread.start()
-    guiThread.start()
+        #backendThread = threading.Thread(target=client.listen)
+        frontendThread = threading.Thread(target=gameUI.run)
 
-    guiThread.join()
-    backendThread.join()
+        #backendThread.start()
+        frontendThread.start()
+
+        frontendThread.join()
+        #backendThread.join()
+
+    else:
+
+        gameUI.run()

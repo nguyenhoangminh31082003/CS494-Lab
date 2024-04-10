@@ -8,8 +8,8 @@ sys.path.append("../")
 sys.path.append("./Message/")
 
 from Request import Request
-from RequestStatusCode import RequestStatusCode
 from Response import Response
+from RequestStatusCode import RequestStatusCode
 from ResponseStatusCode import ResponseStatusCode
 
 class ClientModel:

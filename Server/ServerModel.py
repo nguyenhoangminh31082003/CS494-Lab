@@ -30,8 +30,10 @@ class ServerModel:
         self.isRunning = False
 
     @staticmethod
-    def getStoredServerInformation():
-        if not os.path.exists("./Data/server_information.json"):
+    def getStoredServerInformation() -> dict:
+        fileName = "./Data/server_information.json"
+
+        if not os.path.exists(fileName):
             return {
                 "host": "127.0.0.1",
                 "port": 12000,
@@ -40,7 +42,7 @@ class ServerModel:
                 "format": "utf-8"
             }
         
-        with open("./Data/server_information.json", "r") as file:
+        with open(fileName, "r") as file:
             return json.load(file)
 
     def createListeningSocketAndSelector(self) -> bool:
