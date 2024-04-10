@@ -1,9 +1,11 @@
 import os
+import enum
+
 from pygame import image
 
 
 # enum for screen view
-class ScreenView:
+class ScreenView(enum.IntEnum):
     REGISTER = 0
     WAIT = 1
     GAME = 2
