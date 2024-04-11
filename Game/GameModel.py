@@ -29,6 +29,7 @@ class GameModel:
         self.startTime = time.time()
         self.rules = self.getStoredGameInformation()
         self.secondCount = None
+        self.turnCount = 0
 
     def haveEnoughPlayers(self) -> bool:
         return len(self.players) >= self.rules["required_number_of_players"]
@@ -74,7 +75,7 @@ class GameModel:
         self.watchers.remove(watcher)
 
     def ready(self) -> None:
-        self.roundCount = 0
+        self.roundCount = self.turnCount = 0
         self.status = GameStatus.READY
         self.quizList.chooseRandomQuiz()
 
@@ -136,6 +137,7 @@ class GameModel:
     def getJSONSummary(self) -> dict:
         result = {
             "round_count": self.roundCount,
+            "turn_count": self.turnCount,
             "player": self.players.getJSONSummary(),
             "quiz": self.quizList.getJSONSummary(),
             "guessed_characters": self.guessedCharacters,
@@ -215,6 +217,8 @@ class GameModel:
 
         if guessedCharacter not in self.guessedCharacters:
             self.guessedCharacters.append(guessedCharacter)
+
+        self.turnCount += 1
 
         currentPlayer = self.players.getCurrentPlayer()
         quiz = self.quizList.getCurrentQuiz()
