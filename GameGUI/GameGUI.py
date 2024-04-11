@@ -58,17 +58,20 @@ class GameGUI:
         self.scoreboard.clear()
 
         playerInformation = self.summary["player"]["player_information"]
+        currentPlayerNickname = self.summary["player"]["current_player"]
 
         for i, player in enumerate(playerInformation):
             
             if player["nickname"] is None:
                 continue
+
+            color = (ColorCodeTuples.GREEN if player["nickname"] == currentPlayerNickname else ColorCodeTuples.WHITE)
             
             self.scoreboard.append(
                 (
                     TextBox(
                         textFont = AssetConstants.AMATICSC_FONT,
-                        textColor = ColorCodeTuples.WHITE,
+                        textColor = color,
                         textSize = 16,
                         textContent = player["nickname"],
                         containerInfo = (
@@ -78,7 +81,7 @@ class GameGUI:
                     ),
                     TextBox(
                         textFont = AssetConstants.AMATICSC_FONT,
-                        textColor = ColorCodeTuples.WHITE,
+                        textColor = color,
                         textSize = 16,
                         textContent = f": {player['points']}",
                         containerInfo = (
@@ -368,7 +371,7 @@ class GameGUI:
         
         self.gameScreenComponents['hint'].changeTextContent(f"Hint: {hint}")
         self.gameScreenComponents['round'].changeTextContent(f"{self.nickname} - Round: {round}")
-        self.myTurn = self.summary["player"]["current_player"] == self.nickname
+        self.myTurn = (self.summary["player"]["current_player"] == self.nickname)
 
         position = None
         

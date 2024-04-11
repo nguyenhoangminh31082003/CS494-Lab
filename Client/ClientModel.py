@@ -44,7 +44,7 @@ class ClientModel:
         
     def sendLetterGuess(self, letter : str) -> None:
         self.sendRequest(Request(
-        statusCode = RequestStatusCode.ANSWER_SUBMISSION,
+            statusCode = RequestStatusCode.ANSWER_SUBMISSION,
             content = json.dumps({
                 "guessed_character": letter,
                 "guessed_keyword": None,
