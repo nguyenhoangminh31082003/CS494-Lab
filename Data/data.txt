@@ -1,16 +1,2 @@
-15
-python:One of the most popular interpreter programming languages.
-database:the place to store data
-iphone:the luxury mobile phone
-astronaut:people who travel out of the earth
-longest:longest word
-include:The 'import' keyword in C/C++
-internet:Networks of network
-zoom:A meeting call application
-yahoo:A chatting application in the past
-homework:School assignments but you do at home
-language:What are Haskell, Ruby, Clojure, Vietnamese, English called?
-lightning:thing goes before thunder
-batman:A millionaire in DC universe
-ironman:The Spider-Man's uncle in law
-superman:The only man in the Earth wears underwear outside the suit and allergic to a little cute green stone
+1
+honorificabilitudinitatibus: The state of being able to achieve honors
