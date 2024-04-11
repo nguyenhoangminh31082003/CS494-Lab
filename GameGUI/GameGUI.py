@@ -506,6 +506,9 @@ class GameGUI:
             if not self.running:
                 break
 
+            self.timeLeft = 20 - int(time.time() - self.summary["start_time"])
+            self.gameScreenComponents["Timer"].changeTextContent(str(self.timeLeft))
+
             pygame.display.update()
         
         self.client.closeConnection()

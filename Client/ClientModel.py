@@ -67,7 +67,6 @@ class ClientModel:
         while True:
             try:
                 receivedData = self.clientSocket.recv(1024).decode().strip()
-                
             except:
                 break
             
@@ -83,7 +82,7 @@ class ClientModel:
 
             response = self.receivedResponses.get()
 
-            #print(f"!!![CLIENT] Returning response: {response.toString()}")
+            print(f"!!![CLIENT] Returning response: {response.toString()}")
 
             return response 
         

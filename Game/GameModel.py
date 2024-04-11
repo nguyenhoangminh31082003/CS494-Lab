@@ -4,7 +4,6 @@ import time
 import sys
 import os
 
-import sys
 sys.path.append("./Quizzes/")
 sys.path.append("./Message/")
 sys.path.append("./Participants/")
@@ -97,13 +96,13 @@ class GameModel:
 
         self.status = GameStatus.RUNNING
 
-        self.sendBroadcastedSummary()
-            
-        self.broadcastSummary()
-        
         self.requireCurrentPlayerAnswer()
 
         self.startTime = time.time()
+
+        self.sendBroadcastedSummary()
+            
+        self.broadcastSummary()
     
         self.broadcastResponse(Response(
             statusCode = ResponseStatusCode.GAME_STARTED,
@@ -141,7 +140,6 @@ class GameModel:
             "quiz": self.quizList.getJSONSummary(),
             "guessed_characters": self.guessedCharacters,
             "client_count_summary": self.getClientCountSummary(),
-            "second_passed_count": self.secondCount if self.secondCount is not None else 0,
             "start_time": self.startTime
         }
 
@@ -265,11 +263,11 @@ class GameModel:
             if not self.moveTurnToNextPlayer():
                 return True
         
-        self.broadcastSummary()
-        self.sendBroadcastedSummary()
-
         self.requireCurrentPlayerAnswer()
         self.startTime = time.time()
+
+        self.broadcastSummary()
+        self.sendBroadcastedSummary()
 
         return False
     
