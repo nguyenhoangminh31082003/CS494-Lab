@@ -130,7 +130,7 @@ class GameGUI:
                         textSize = 16,
                         textContent = player["nickname"],
                         containerInfo = (
-                            self.screenWidth / 20, 
+                            self.screenWidth / 25, 
                             self.screenHeight / 10 + (i + 1) * 30, 0, 0
                         )
                     ),
@@ -202,15 +202,6 @@ class GameGUI:
             20,
             "ANSWER",
             (containerBoxContainer[0], self.screenHeight * 2 / 10, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
-        )
-        
-        self.statisticScreenComponents['HOME'] = TextBox(
-            AssetConstants.AMATICSC_FONT,
-            ColorCodeTuples.WHITE,
-            20,
-            "HOME",
-            (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 + self.screenHeight * 13 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100),
-            True
         )
         
         self.openScreenComponents['notify'] = TextBox(
@@ -598,10 +589,6 @@ class GameGUI:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
         
-        if pos and self.statisticScreenComponents['HOME'].isClicked(pos):
-            self.screenViewID = ScreenViewID.REGISTER
-            self.initialize()
-       
         self.screen.blit(self.inGameImage, (0, 0))
         
         for element in self.statisticScreenComponents.values():
