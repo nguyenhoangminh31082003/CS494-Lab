@@ -12,6 +12,7 @@ class ResponseStatusCode(enum.IntEnum):
     GAME_ENDED = 10
     BROADCASTED_SUMMARY = 11
     GAME_STARTED = 12
+    BROADCASTED_PLAYER_ANSWER = 13
 
     def isNicknameRelated(self) -> bool:
         return self in [

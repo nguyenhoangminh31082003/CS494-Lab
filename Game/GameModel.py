@@ -222,16 +222,49 @@ class GameModel:
 
                 if not self.players.disqualifyCurrentPlayer():
                     self.end()
+                    
+                    #self.broadcastResponse(Response(
+                    #    statusCode = ResponseStatusCode.BROADCASTED_PLAYER_ANSWER,
+                    #    content = json.dumps({
+                    #        "guessed_character": guessedCharacter,
+                    #        "guessed_keyword": guessedKeyword,
+                    #        "author_nickname": currentPlayer.getNickname(),
+                    #        "assessment": "The player is disqualified because of the wrong keyword guess!!!"
+                    #    })
+                    #))
+                    
                     return True
 
                 flag = True
 
         if quiz.isSolved():
             self.end()
+
+            #self.broadcastResponse(Response(
+            #    statusCode = ResponseStatusCode.BROADCASTED_PLAYER_ANSWER,
+            #    content = json.dumps({
+            #        "guessed_character": guessedCharacter,
+            #        "guessed_keyword": guessedKeyword,
+            #        "author_nickname": currentPlayer.getNickname(),
+            #        "assessment": "The player has solved the quiz!!!"
+            #        })
+            #    ))
+
             return True
             
         if flag:
             if not self.moveTurnToNextPlayer():
+
+                #self.broadcastResponse(Response(
+                #    statusCode = ResponseStatusCode.BROADCASTED_PLAYER_ANSWER,
+                #    content = json.dumps({
+                #        "guessed_character": guessedCharacter,
+                #        "guessed_keyword": guessedKeyword,
+                #        "author_nickname": currentPlayer.getNickname(),
+                #        "assessment": "The player has guessed wrong letter!!!"
+                #    })
+                #))
+
                 return True
         
         self.broadcastSummary()
