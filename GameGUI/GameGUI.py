@@ -62,7 +62,7 @@ class GameGUI:
         
         self.statistic.clear()
         
-        rankInformation = self.rank_summary["ranks"]
+        rankInformation = self.rank_summary['rank_summary']["ranks"]
         
         for i, rank in enumerate(rankInformation):
             self.statistic.append(
@@ -130,7 +130,7 @@ class GameGUI:
                         textSize = 16,
                         textContent = player["nickname"],
                         containerInfo = (
-                            self.screenWidth / 25, 
+                            self.screenWidth / 35, 
                             self.screenHeight / 10 + (i + 1) * 30, 0, 0
                         )
                     ),
@@ -314,7 +314,8 @@ class GameGUI:
             AssetConstants.AMATICSC_FONT,
             ColorCodeTuples.BLACK,
             20,
-            (containerBoxContainer[0], containerBoxContainer[1] + self.screenHeight * 50 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
+            (containerBoxContainer[0], containerBoxContainer[1] + self.screenHeight * 50 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100),
+            maxChar=30
         )
             
 
@@ -487,9 +488,9 @@ class GameGUI:
         round = self.summary["round_count"]
         word = self.summary["quiz"]["current_keyword"]
         wordLength = len(word)
-        hint_raw = self.summary["quiz"]["hint"]
+        hint = self.summary["quiz"]["hint"]
         order = self.summary['turn_count']
-        hint = "\n".join([hint_raw[i:i+30] for i in range(0, len(hint_raw), 30)])
+        
         
         self.gameScreenComponents['hint'].changeTextContent(f"Hint: {hint}")
         self.gameScreenComponents['round'].changeTextContent(f"{self.nickname} - Round: {round}")
