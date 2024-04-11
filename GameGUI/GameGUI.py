@@ -153,6 +153,14 @@ class GameGUI:
             True
         )
         
+        self.gameScreenComponents['hint'] = TextBox(
+            AssetConstants.AMATICSC_FONT,
+            ColorCodeTuples.WHITE,
+            30,
+            "hint",
+            (containerBoxContainer[0], self.screenHeight * 2 / 10, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100),
+        )
+        
         self.gameScreenComponents['player'] = TextBox(
             AssetConstants.AMATICSC_FONT,
             ColorCodeTuples.WHITE,
@@ -170,6 +178,24 @@ class GameGUI:
             (self.screenWidth * 9 / 10, self.screenHeight / 10, 0, 0),
             True
         )
+        
+        self.gameScreenComponents['Watch'] = TextBox(
+            AssetConstants.AMATICSC_FONT,
+            ColorCodeTuples.WHITE,
+            20,
+            "Watcher:",
+            (self.screenWidth * 9 / 10, self.screenHeight / 10 + 90, 0, 0),
+            True
+        )
+        
+        self.gameScreenComponents['Watcher'] = TextBox(
+            AssetConstants.AMATICSC_FONT,
+            ColorCodeTuples.WHITE,
+            20,
+            str(0),
+            (self.screenWidth * 9 / 10, self.screenHeight / 10 + 120, 0, 0),
+        )
+        
         
         self.gameScreenComponents['Timer'] = TextBox(
             AssetConstants.AMATICSC_FONT,
@@ -304,8 +330,6 @@ class GameGUI:
                 self.running = False
                 pygame.quit()
                 return
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                self.screenViewID = ScreenViewID.GAME
         
         self.screen.blit(self.inGameImage, (0, 0))
         
@@ -348,6 +372,8 @@ class GameGUI:
 
         word = self.summary["quiz"]["current_keyword"]
         wordLength = len(word)
+        hint = self.summary["quiz"]["hint"]
+        self.gameScreenComponents['hint'].changeTextContent(f"Hint: {hint}")
 
         for i in range(wordLength):
             x = self.screenWidth // 2 - ((18 * wordLength) // 2)
