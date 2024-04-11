@@ -1,8 +1,8 @@
 {
     "title": "Magic Wheel",
     "screen_size": {
-        "width": 1300,
-        "height": 600
+        "width": 600,
+        "height": 400
     },
     "frame_rate": 60
 }
