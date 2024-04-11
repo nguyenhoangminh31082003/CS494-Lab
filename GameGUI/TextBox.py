@@ -51,6 +51,12 @@ class TextBox:
 
 	def drawUpLeft(self, gameScreen):
 		gameScreen.blit(self.text, self.upLeftTextCoord)
+	
+	def isClicked(self, mousePos) -> bool:
+		if self.hasBorder:
+			return self.border.collidepoint(mousePos)
+		else:
+			return False
   
 	def resize(self, containerInfo, *args, **kwargs):
 		textWidth = self.textFont.size(self.textContent)[0]

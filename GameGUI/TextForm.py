@@ -15,6 +15,12 @@ class TextForm(TextBox):
     def deselect(self):
         self.isSelected = False
         
+    def alterSelection(self):
+        self.isSelected = not self.isSelected
+        
+    def checkSelection(self) -> bool:
+        return self.isSelected
+        
     def getText(self):
         return self.textContent
     
@@ -31,7 +37,7 @@ class TextForm(TextBox):
         # draw the inputRect
         pygame.draw.rect(gameScreen, (255, 255, 255), self.inputRect)
         gameScreen.blit(self.text, (self.inputRect.x + 10, self.inputRect.y))
-    
+        
     def resize(self, containerInfo, *args, **kwargs):
         super().resize(containerInfo, *args, **kwargs)
         self.inputRect = pygame.Rect(containerInfo[0], containerInfo[1], containerInfo[2], containerInfo[3])

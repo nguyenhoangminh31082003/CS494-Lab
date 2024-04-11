@@ -42,7 +42,9 @@ class GameGUI:
         self.statisticScreenComponents = dict()
 
         self.buttons = []
-
+        self.keyword_button = None 
+        self.keyword_textform = None
+        self.guess_keyword = False
         self.client = client
         self.scoreboard = []
 
@@ -86,13 +88,15 @@ class GameGUI:
                         textSize = 16,
                         textContent = f": {player['points']}",
                         containerInfo = (
-                            self.screenWidth / 8, 
+                            self.screenWidth / 7, 
                             self.screenHeight / 10 + (i + 1) * 30, 0, 0
                         ),
                     )
                 )
             )
 
+        watcher = self.summary["client_count_summary"]["watcher_count"]
+        self.gameScreenComponents['Watcher'].changeTextContent(str(watcher))
         self.timeLeft = 20 - int(time.time() - self.summary["start_time"])
         self.gameScreenComponents['Timer'].changeTextContent(str(self.timeLeft))
         
@@ -228,6 +232,23 @@ class GameGUI:
             AssetConstants.PLAY_BUTTON,
             (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 + self.screenHeight * 25 / 100, containerBoxContainer[2], self.screenHeight - (containerBoxContainer[1] + containerBoxContainer[3]))
         )
+        
+        self.keyword_button = TextBox(
+            AssetConstants.AMATICSC_FONT,
+            ColorCodeTuples.WHITE,
+            20,
+            "KEYWORD",
+            (containerBoxContainer[0] - self.screenWidth * 1 / 10 + ( 26 % 9 ) * 36 + 60, containerBoxContainer[1] + self.screenHeight * 28 / 100 + (26 // 9) * 36 + 14, 0, 0),
+            True
+        )
+        
+        self.keyword_textform = TextForm(
+            AssetConstants.AMATICSC_FONT,
+            ColorCodeTuples.BLACK,
+            20,
+            (containerBoxContainer[0], containerBoxContainer[1] + self.screenHeight * 50 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
+        )
+            
 
     def initializeImages(self):
         self.backgroundImage = pygame.transform.scale(
@@ -368,6 +389,11 @@ class GameGUI:
         word = self.summary["quiz"]["current_keyword"]
         wordLength = len(word)
         hint_raw = self.summary["quiz"]["hint"]
+        order = None
+        for i in self.summary["player"]["player_information"]:
+            if i["nickname"] == self.nickname:
+                order = i["order"]
+                break
         hint = "\n".join([hint_raw[i:i+30] for i in range(0, len(hint_raw), 30)])
         
         self.gameScreenComponents['hint'].changeTextContent(f"Hint: {hint}")
@@ -381,6 +407,13 @@ class GameGUI:
                 self.running = False
                 pygame.quit()
                 return
+            elif event.type == pygame.KEYDOWN:
+                if self.keyword_textform.checkSelection():
+                    if event.key == pygame.K_RETURN:
+                        if self.keyword_textform.checkSelection():
+                            self.client.sendLetterGuess(self.keyword_textform.getText())
+                            self.keyword_textform.alterSelection()
+                    self.keyword_textform.addText(event.unicode)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 position = pygame.mouse.get_pos()
                 print("Mouse position: ", position)
@@ -398,7 +431,7 @@ class GameGUI:
             
             button.draw(self.screen)
             
-            if position and self.myTurn:
+            if position and self.myTurn and not self.keyword_textform.checkSelection():
                 
                 if button.collision(position):
                     self.client.sendLetterGuess(button.text)
@@ -408,6 +441,10 @@ class GameGUI:
             if self.myTurn:
                 self.client.sendLetterGuess(" ")
             self.submit = True
+            
+        if position and self.myTurn and round > order:
+            if self.keyword_button.isClicked(position):
+                self.keyword_textform.alterSelection()
                 
 
         for i in range(wordLength):
@@ -417,10 +454,11 @@ class GameGUI:
             pygame.draw.line(self.screen, ColorCodeTuples.WHITE, (x1, y1), (x2, y2), 2)
             # draw the word
             text = self.font.render(word[i], True, ColorCodeTuples.WHITE)
-            self.screen.blit(text, (x1 + 5, y1 - 20))
+            self.screen.blit(text, (x1 - text.get_width(), y1 - 30))
         
         playerInformation = self.summary["player"]["player_information"]
         currentPlayerNickname = self.summary["player"]["current_player"]
+        self.keyword_button.draw(self.screen)
 
         for i, player in enumerate(playerInformation):
             self.scoreboard[i][0].drawLeftToRight(self.screen)
@@ -428,6 +466,12 @@ class GameGUI:
             if player["nickname"] == currentPlayerNickname: 
                 self.scoreboard[i][0].changeColor(ColorCodeTuples.GREEN)
                 self.scoreboard[i][1].changeColor(ColorCodeTuples.GREEN)
+            if player['alive'] == False:
+                self.scoreboard[i][0].changeColor(ColorCodeTuples.RED)
+                self.scoreboard[i][1].changeColor(ColorCodeTuples.RED)
+        
+        if self.keyword_textform.checkSelection():
+            self.keyword_textform.draw(self.screen)
     
     def displayLoseScreen(self):
         for event in pygame.event.get():
