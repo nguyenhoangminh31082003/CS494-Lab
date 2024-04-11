@@ -11,6 +11,9 @@ class TextBox:
 		self.textContent = textContent
 		self.text = self.textFont.render(textContent, True, textColor)
 		self.containerInfo = containerInfo
+
+		print(textContent)
+
 		textHeight = self.textFont.size(textContent)[1]
 		textWidth = self.textFont.size(textContent)[0]
 		self.textCoord = (containerInfo[0] + (containerInfo[2] - textWidth) / 2, containerInfo[1] + (containerInfo[3] - textHeight) / 2)

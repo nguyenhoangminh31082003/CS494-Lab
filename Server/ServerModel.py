@@ -138,6 +138,8 @@ class ServerModel:
             content=f"Player with address {participant.address} has set the nickname as {nickname}"
         ))
 
+        self.game.sendBroadcastedSummary()
+
         print(f"[SERVER] Player with address {participant.address} has set the nickname as {nickname}")
 
         self.game.startNewMatch()

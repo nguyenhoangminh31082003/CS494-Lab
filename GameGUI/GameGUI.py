@@ -55,6 +55,10 @@ class GameGUI:
         playerInformation = self.summary["player"]["player_information"]
 
         for i, player in enumerate(playerInformation):
+            
+            if player["nickname"] is None:
+                continue
+            
             self.scoreboard.append(
                 (
                     TextBox(
@@ -426,6 +430,9 @@ class GameGUI:
         if statusCode == ResponseStatusCode.BROADCASTED_SUMMARY:
             self.summary = json.loads(content)
             self.bindSummaryUI()
+
+            print(f"[CLIENT] Received summary: {json.dumps(self.summary, indent = 4)}")
+
         elif statusCode == ResponseStatusCode.NICKNAME_ACCEPTED:
             self.screenViewID = ScreenViewID.WAIT
             self.waitScreenComponents['hello'].changeTextContent(f"Hello, {self.nickname}!")
