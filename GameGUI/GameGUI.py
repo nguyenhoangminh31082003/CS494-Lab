@@ -49,6 +49,7 @@ class GameGUI:
         self.summary = None
 
         self.timeLeft = 20
+        self.ranks = None
 
     def bindSummaryUI(self) -> bool:
 
@@ -472,6 +473,10 @@ class GameGUI:
             for button in self.buttons:
                 if button.text in self.summary["guessed_characters"]:
                     button.updateColor()
+
+        elif statusCode == ResponseStatusCode.BROADCASTED_RANK:
+            self.ranks = json.loads(content)
+            print(json.dumps(self.ranks, indent = 4))
 
         elif statusCode == ResponseStatusCode.NICKNAME_ACCEPTED:
             self.screenViewID = ScreenViewID.WAIT

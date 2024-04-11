@@ -88,6 +88,36 @@ class PlayerList:
             })
 
         return result
+    
+    def getJSONRankSummary(self) -> dict:
+        playerCount = len(self.players)
+        indices = list(range(playerCount))
+        indices.sort(key = lambda x: self.players[x].score, reverse = True)
+        points = -1
+        rank = 0
+        result = {
+            "player_count": playerCount,
+            "ranks": [],
+            "winner_nicknames": []
+        }
+
+        for i, index in enumerate(indices):
+            score = self.players[index].score
+            if points != score:
+                points = score
+                rank = i + 1
+            if rank == 1:
+                result["winner_nicknames"].append(self.players[index].getNickname())
+
+            result["ranks"].append({
+                "order": index,
+                "nickname": self.players[index].getNickname(),
+                "points": score,
+                "rank": rank
+            })
+
+        return result
+
 
     def getRankSummary(self) -> str:
         winners = []

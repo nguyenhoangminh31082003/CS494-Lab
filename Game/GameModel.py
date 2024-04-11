@@ -172,7 +172,7 @@ class GameModel:
         ))
     
     def end(self) -> None:
-        self.broadcastFinalResult()
+        self.broadcastRanks()
         self.status = GameStatus.ENDED
         self.broadcastResponse(Response(
             statusCode = ResponseStatusCode.GAME_ENDED,
@@ -279,6 +279,13 @@ class GameModel:
         self.broadcastResponse(Response(
             statusCode = ResponseStatusCode.BROADCASTED_MESSAGE,
             content = self.players.getRankSummary()
+        ))
+
+    def broadcastRanks(self) -> None:
+
+        self.broadcastResponse(Response(
+            statusCode = ResponseStatusCode.BROADCASTED_RANK,
+            content = json.dumps(self.players.getJSONRankSummary())
         ))
 
     def containsUnsentResponse(self) -> bool:
