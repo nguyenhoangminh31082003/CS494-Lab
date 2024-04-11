@@ -18,6 +18,10 @@ class TextButton(pygame.sprite.Sprite):
 				self.clicked = True
 				return True, self.text
 		return False
+
+	def updateColor(self):
+		self.clicked = True
+		self.image = self.textFont.render(self.text, True, ColorCodeTuples.GREEN)
 		
 	def draw(self, gameScreen):
 		pygame.draw.rect(gameScreen, ColorCodeTuples.WHITE, self.rect, 2)

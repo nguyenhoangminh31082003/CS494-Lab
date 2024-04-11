@@ -42,6 +42,24 @@ class ClientModel:
     def requestNickname(self, nickname : str) -> None:
         self.sendRequest(Request(RequestStatusCode.NICKNAME_REQUEST, nickname))
         
+    def sendLetterGuess(self, letter : str) -> None:
+        self.sendRequest(Request(
+        statusCode = RequestStatusCode.ANSWER_SUBMISSION,
+            content = json.dumps({
+                "guessed_character": letter,
+                "guessed_keyword": None,
+            })
+        ))
+    
+    def sendWordGuess(self, word : str) -> None:
+        self.sendRequest(Request(
+        statusCode = RequestStatusCode.ANSWER_SUBMISSION,
+            content = json.dumps({
+                "guessed_keyword": word,
+                "guessed_character": None,
+            })
+        ))
+        
     def requestCloseConnection(self) -> None:
         self.sendRequest(Request(RequestStatusCode.CLOSE_CONNECTION, "Close connection"))
 

@@ -124,7 +124,7 @@ class ServerModel:
             content = f"Watcher with address {participant.address} has left the game"
         
         elif participant.isWaiting():
-            content = f"Waitng with address {participant.address} has left the game"
+            content = f"Waiting with address {participant.address} has left the game"
             self.game.removeUnregisteredPlayer(participant)
         else:
             content = f"Player with address {participant.address} has left the game"

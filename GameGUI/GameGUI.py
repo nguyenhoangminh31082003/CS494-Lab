@@ -25,7 +25,11 @@ class GameGUI:
         self.information = None
         self.running = False
         self.screen = None
+        self.submit = False
+        self.myTurn = False
         self.clock = None
+        self.font = None
+        
 
         self.screenWidth = None
         self.screenHeight = None
@@ -83,7 +87,7 @@ class GameGUI:
                     )
                 )
             )
-
+        
         return True
 
     def initializeScreenComponents(self):
@@ -93,6 +97,8 @@ class GameGUI:
             self.screenWidth * 332 / 1000, 
             self.screenHeight * 332 / 563
         )
+        
+        self.font = pygame.font.Font(AssetConstants.AMATICSC_FONT, 20)
 
         self.openScreenComponents['label'] = TextBox(
             AssetConstants.AMATICSC_FONT,
@@ -152,7 +158,7 @@ class GameGUI:
             AssetConstants.AMATICSC_FONT,
             ColorCodeTuples.WHITE,
             30,
-            "Round: 1",
+            "abcxyzk - Round: 1",
             (containerBoxContainer[0], self.screenHeight / 10, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100),
             True
         )
@@ -341,8 +347,24 @@ class GameGUI:
             element.draw(self.screen)
 
         pygame.display.update()
+    
+    def resetTimer(self):
+        self.timeLeft = 15
+        self.submit = False
+        self.gameScreenComponents['Timer'].changeTextContent(str(self.timeLeft))
+        
         
     def displayMatchScreen(self):
+        
+        round = self.summary["round_count"]
+        word = self.summary["quiz"]["current_keyword"]
+        wordLength = len(word)
+        hint_raw = self.summary["quiz"]["hint"]
+        hint = "\n".join([hint_raw[i:i+30] for i in range(0, len(hint_raw), 30)])
+        
+        self.gameScreenComponents['hint'].changeTextContent(f"Hint: {hint}")
+        self.gameScreenComponents['round'].changeTextContent(f"{self.nickname} - Round: {round}")
+        self.myTurn = self.summary["player"]["current_player"] == self.nickname
 
         position = None
         
@@ -351,9 +373,10 @@ class GameGUI:
                 self.running = False
                 pygame.quit()
                 return
-            elif pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN:
                 position = pygame.mouse.get_pos()
-            elif pygame.USEREVENT:
+                print("Mouse position: ", position)
+            elif event.type == pygame.USEREVENT:
                 if self.timeLeft and not self.submit:
                     self.timeLeft -= 1
                     self.gameScreenComponents['Timer'].changeTextContent(str(self.timeLeft))
@@ -367,23 +390,28 @@ class GameGUI:
             
             button.draw(self.screen)
             
-            if position:
+            if position and self.myTurn:
+                
                 if button.collision(position):
+                    self.client.sendLetterGuess(button.text)
                     self.submit = True
 
         if self.timeLeft == 0:
+            
+            if self.myTurn:
+                self.client.sendLetterGuess(" ")
             self.submit = True
-
-        word = self.summary["quiz"]["current_keyword"]
-        wordLength = len(word)
-        hint = self.summary["quiz"]["hint"]
-        self.gameScreenComponents['hint'].changeTextContent(f"Hint: {hint}")
+                
 
         for i in range(wordLength):
             x = self.screenWidth // 2 - ((18 * wordLength) // 2)
             x1, y1 = (x + 20 * i, self.screenHeight // 2)
             x2, y2 = (x + 20 * i + 15, self.screenHeight // 2)
             pygame.draw.line(self.screen, ColorCodeTuples.WHITE, (x1, y1), (x2, y2), 2)
+            # draw the word
+            text = self.font.render(word[i], True, ColorCodeTuples.WHITE)
+            self.screen.blit(text, (x1 + 5, y1 - 20))
+            
         
         playerInformation = self.summary["player"]["player_information"]
         currentPlayerNickname = self.summary["player"]["current_player"]
@@ -432,12 +460,19 @@ class GameGUI:
             self.bindSummaryUI()
 
             print(f"[CLIENT] Received summary: {json.dumps(self.summary, indent = 4)}")
+            
+        elif statusCode == ResponseStatusCode.QUESTION_SENT:
+            self.resetTimer()
+            for button in self.buttons:
+                if button.text in self.summary["guessed_characters"]:
+                    button.updateColor()
 
         elif statusCode == ResponseStatusCode.NICKNAME_ACCEPTED:
             self.screenViewID = ScreenViewID.WAIT
             self.waitScreenComponents['hello'].changeTextContent(f"Hello, {self.nickname}!")
-        elif statusCode == ResponseStatusCode.GAME_STARTED:
+        elif statusCode == ResponseStatusCode.GAME_STARTED or statusCode == ResponseStatusCode.GAME_FULL:
             self.screenViewID = ScreenViewID.GAME
+        
 
         return True
 
