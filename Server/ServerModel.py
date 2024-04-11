@@ -226,7 +226,7 @@ class ServerModel:
 
             if self.game.getStatus().isRunning():
                 self.game.handleTimer()
-                self.game.sendBroadcastedSummary()
+                #self.game.sendBroadcastedSummary()
 
     def readPlayerCountRequirement(self) -> int:
         N = 0
