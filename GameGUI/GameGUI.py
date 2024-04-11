@@ -417,7 +417,6 @@ class GameGUI:
             # draw the word
             text = self.font.render(word[i], True, ColorCodeTuples.WHITE)
             self.screen.blit(text, (x1 + 5, y1 - 20))
-            
         
         playerInformation = self.summary["player"]["player_information"]
         currentPlayerNickname = self.summary["player"]["current_player"]

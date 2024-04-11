@@ -204,6 +204,7 @@ class GameModel:
                 self.end()
                 return True
             self.startTime = time.time()
+            self.secondCount = self.timeout - int(time.time() - self.startTime)
 
         return False
 
