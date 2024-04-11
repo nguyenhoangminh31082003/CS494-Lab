@@ -1,4 +1,5 @@
 import pygame
+import time
 import json
 import sys
 import os
@@ -47,7 +48,7 @@ class GameGUI:
 
         self.summary = None
 
-        #self.timeLeft = 15
+        self.timeLeft = 20
 
     def bindSummaryUI(self) -> bool:
 
@@ -88,9 +89,8 @@ class GameGUI:
                 )
             )
 
-        if self.summary["second_passed_count"] is not None:
-            self.gameScreenComponents['Timer'].changeTextContent(str(self.summary["second_passed_count"]))
-            #print("???" * 3000, self.summary["second_passed_count"])
+        self.timeLeft = 20 - int(time.time() - self.summary["start_time"])
+        self.gameScreenComponents['Timer'].changeTextContent(str(self.timeLeft))
         
         return True
 
@@ -215,7 +215,7 @@ class GameGUI:
             AssetConstants.AMATICSC_FONT,
             ColorCodeTuples.WHITE,
             20,
-            str(self.summary["second_passed_count"] if self.summary is not None else 0),
+            str(self.timeLeft),
             (self.screenWidth * 9 / 10, self.screenHeight / 10 + 30, 0, 0),
         )
 
@@ -352,11 +352,10 @@ class GameGUI:
 
         pygame.display.update()
     
-    #def resetTimer(self):
-    #    self.timeLeft = 15
-    #    self.submit = False
-    #    #self.gameScreenComponents['Timer'].changeTextContent(str(self.timeLeft))
-    #    self.gameScreenComponents['Timer'].changeTextContent(str(self.summary["second_passed_count"]))
+    def resetTimer(self):
+        self.timeLeft = 20 - int(time.time() - self.summary["start_time"])
+        self.submit = False
+        self.gameScreenComponents['Timer'].changeTextContent(str(self.timeLeft))
         
         
     def displayMatchScreen(self):
@@ -382,11 +381,9 @@ class GameGUI:
                 position = pygame.mouse.get_pos()
                 print("Mouse position: ", position)
             elif event.type == pygame.USEREVENT:
-                #if self.timeLeft and not self.submit:
-                #    self.timeLeft -= 1
-                #    #self.gameScreenComponents['Timer'].changeTextContent(str(self.timeLeft))
-                #    self.gameScreenComponents['Timer'].changeTextContent(str(self.summary["second_passed_count"]))
-                self.gameScreenComponents['Timer'].changeTextContent(str(self.summary["second_passed_count"]))
+                if self.timeLeft > 0 and not self.submit:
+                    self.timeLeft -= 1
+                    self.gameScreenComponents['Timer'].changeTextContent(str(self.timeLeft))
         
         self.screen.blit(self.inGameImage, (0, 0))
         
@@ -403,8 +400,7 @@ class GameGUI:
                     self.client.sendLetterGuess(button.text)
                     self.submit = True
 
-        #if self.timeLeft == 0:
-        if self.summary["second_passed_count"] == 0:    
+        if self.timeLeft <= 0:
             if self.myTurn:
                 self.client.sendLetterGuess(" ")
             self.submit = True
@@ -464,7 +460,7 @@ class GameGUI:
 
         if statusCode == ResponseStatusCode.BROADCASTED_SUMMARY:
             self.summary = json.loads(content)
-            
+
             self.bindSummaryUI()
 
             print(f"[CLIENT] Received summary: {json.dumps(self.summary, indent = 4)}")
