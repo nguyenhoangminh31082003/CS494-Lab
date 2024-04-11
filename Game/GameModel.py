@@ -215,30 +215,37 @@ class GameModel:
         guessedCharacter = answer["guessed_character"]
         guessedKeyword = answer["guessed_keyword"]
 
-        if guessedCharacter not in self.guessedCharacters:
-            self.guessedCharacters.append(guessedCharacter)
-
         self.turnCount += 1
 
+        if (guessedCharacter is None) == (guessedKeyword is None):
+            return False
+        
         currentPlayer = self.players.getCurrentPlayer()
         quiz = self.quizList.getCurrentQuiz()
 
-        flag = False
+        turnLost = False
 
-        if quiz.receiveLetterGuess(guessedCharacter):
-            currentPlayer.score += self.rules["number_of_points_granted_for_correct_guess"]
-            self.broadcastResponse(Response(
-                statusCode = ResponseStatusCode.BROADCASTED_MESSAGE,
-                content = f"Character '{guessedCharacter}' has {quiz.countOccernerces(guessedCharacter)} occurences in the keyword!!!"
-            ))
-        else:
-            self.broadcastResponse(Response(
-                statusCode = ResponseStatusCode.BROADCASTED_MESSAGE,
-                content = f"Character '{guessedCharacter}' is not in the keyword!!!"
-            ))
-            flag = True
+        if guessedCharacter is not None:
+            if guessedCharacter in self.guessedCharacters:
+                return False
+                
+            self.guessedCharacters.append(guessedCharacter)
 
-        if guessedKeyword is not None:
+            if quiz.receiveLetterGuess(guessedCharacter):
+                currentPlayer.score += self.rules["number_of_points_granted_for_correct_guess"]
+                self.broadcastResponse(Response(
+                    statusCode = ResponseStatusCode.BROADCASTED_MESSAGE,
+                    content = f"Character '{guessedCharacter}' has {quiz.countOccernerces(guessedCharacter)} occurences in the keyword!!!"
+                ))
+            else:
+                self.broadcastResponse(Response(
+                    statusCode = ResponseStatusCode.BROADCASTED_MESSAGE,
+                    content = f"Character '{guessedCharacter}' is not in the keyword!!!"
+                ))
+
+                turnLost = True
+
+        elif guessedKeyword is not None:
             if quiz.receiveKeywordGuess(guessedKeyword):
                 currentPlayer.score += self.rules["number_of_points_granted_for_correct_keyword"]
                 self.broadcastResponse(Response(
@@ -256,14 +263,14 @@ class GameModel:
                     self.end()
                     
                     return True
-
-                flag = True
+                
+                turnLost = True
 
         if quiz.isSolved():
             self.end()
             return True
             
-        if flag:
+        if turnLost:
             if not self.moveTurnToNextPlayer():
                 return True
         
