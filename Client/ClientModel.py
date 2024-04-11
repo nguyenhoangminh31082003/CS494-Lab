@@ -73,7 +73,7 @@ class ClientModel:
             
             if receivedData:
 
-                print(f"[CLIENT] Received data: {receivedData}")
+                #print(f"[CLIENT] Received data: {receivedData}")
 
                 self.receivedResponses.put(Response.getDeserializedResponse(receivedData))
 
@@ -83,7 +83,7 @@ class ClientModel:
 
             response = self.receivedResponses.get()
 
-            print(f"!!![CLIENT] Returning response: {response.toString()}")
+            #print(f"!!![CLIENT] Returning response: {response.toString()}")
 
             return response 
         

@@ -1,6 +1,7 @@
-import sys
 import random
 import json
+import time
+import sys
 import os
 
 import sys
@@ -26,8 +27,9 @@ class GameModel:
         self.timeout = 20
         self.status = GameStatus.OFF
         self.guessedCharacters = []
-
+        self.startTime = time.time()
         self.rules = self.getStoredGameInformation()
+        self.secondCount = None
 
     def haveEnoughPlayers(self) -> bool:
         return len(self.players) >= self.rules["required_number_of_players"]
@@ -100,6 +102,8 @@ class GameModel:
         self.broadcastSummary()
         
         self.requireCurrentPlayerAnswer()
+
+        self.startTime = time.time()
     
         self.broadcastResponse(Response(
             statusCode = ResponseStatusCode.GAME_STARTED,
@@ -136,7 +140,9 @@ class GameModel:
             "player": self.players.getJSONSummary(),
             "quiz": self.quizList.getJSONSummary(),
             "guessed_characters": self.guessedCharacters,
-            "client_count_summary": self.getClientCountSummary()
+            "client_count_summary": self.getClientCountSummary(),
+            "second_passed_count": self.secondCount if self.secondCount is not None else 0,
+            "start_time": self.startTime
         }
 
         return result
@@ -190,6 +196,17 @@ class GameModel:
                 return False
         return self.status.isRunning()
         
+    def handleTimer(self) -> bool:
+        self.secondCount = self.timeout - int(time.time() - self.startTime)
+
+        if self.secondCount < 0:
+            if not self.moveTurnToNextPlayer():
+                self.end()
+                return True
+            self.startTime = time.time()
+
+        return False
+
     def handleAnswerSubmission(self, answer: dict) -> bool:
         if not self.status.isRunning():
             return True
@@ -235,54 +252,23 @@ class GameModel:
                 if not self.players.disqualifyCurrentPlayer():
                     self.end()
                     
-                    #self.broadcastResponse(Response(
-                    #    statusCode = ResponseStatusCode.BROADCASTED_PLAYER_ANSWER,
-                    #    content = json.dumps({
-                    #        "guessed_character": guessedCharacter,
-                    #        "guessed_keyword": guessedKeyword,
-                    #        "author_nickname": currentPlayer.getNickname(),
-                    #        "assessment": "The player is disqualified because of the wrong keyword guess!!!"
-                    #    })
-                    #))
-                    
                     return True
 
                 flag = True
 
         if quiz.isSolved():
             self.end()
-
-            #self.broadcastResponse(Response(
-            #    statusCode = ResponseStatusCode.BROADCASTED_PLAYER_ANSWER,
-            #    content = json.dumps({
-            #        "guessed_character": guessedCharacter,
-            #        "guessed_keyword": guessedKeyword,
-            #        "author_nickname": currentPlayer.getNickname(),
-            #        "assessment": "The player has solved the quiz!!!"
-            #        })
-            #    ))
-
             return True
             
         if flag:
             if not self.moveTurnToNextPlayer():
-
-                #self.broadcastResponse(Response(
-                #    statusCode = ResponseStatusCode.BROADCASTED_PLAYER_ANSWER,
-                #    content = json.dumps({
-                #        "guessed_character": guessedCharacter,
-                #        "guessed_keyword": guessedKeyword,
-                #        "author_nickname": currentPlayer.getNickname(),
-                #        "assessment": "The player has guessed wrong letter!!!"
-                #    })
-                #))
-
                 return True
         
         self.broadcastSummary()
         self.sendBroadcastedSummary()
 
         self.requireCurrentPlayerAnswer()
+        self.startTime = time.time()
 
         return False
     

@@ -1,12 +1,11 @@
 import threading
 import selectors
-import time
-import sys
 import socket
 import json
+import time
+import sys
 import os
 
-import sys
 sys.path.append("./Message/")
 sys.path.append("./Participants/")
 sys.path.append("./Game/")
@@ -224,6 +223,10 @@ class ServerModel:
 
             if self.game.getStatus().isEnded() and (not self.game.containsUnsentResponse()):
                 self.game.stop()
+
+            if self.game.getStatus().isRunning():
+                self.game.handleTimer()
+                self.game.sendBroadcastedSummary()
 
     def readPlayerCountRequirement(self) -> int:
         N = 0
