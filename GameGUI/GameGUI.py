@@ -515,7 +515,7 @@ class GameGUI:
                 if self.keyword_textform.checkSelection():
                     if event.key == pygame.K_RETURN:
                         if self.keyword_textform.checkSelection():
-                            self.client.sendLetterGuess(self.keyword_textform.getText())
+                            self.client.sendWordGuess(self.keyword_textform.getText())
                             self.keyword_textform.alterSelection()
                     self.keyword_textform.addText(event.unicode)
             elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -558,7 +558,7 @@ class GameGUI:
             pygame.draw.line(self.screen, ColorCodeTuples.WHITE, (x1, y1), (x2, y2), 2)
             # draw the word
             text = self.font.render(word[i], True, ColorCodeTuples.WHITE)
-            self.screen.blit(text, (x1 - text.get_width(), y1 - 30))
+            self.screen.blit(text, (x1 - text.get_width() + 13, y1 - 30))
         
         playerInformation = self.summary["player"]["player_information"]
         currentPlayerNickname = self.summary["player"]["current_player"]
