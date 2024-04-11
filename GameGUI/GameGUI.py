@@ -497,11 +497,7 @@ class GameGUI:
         word = self.summary["quiz"]["current_keyword"]
         wordLength = len(word)
         hint_raw = self.summary["quiz"]["hint"]
-        order = 0
-        for i in self.summary["player"]["player_information"]:
-            if i["nickname"] == self.nickname:
-                order = i["order"]
-                break
+        order = self.summary['turn_count']
         hint = "\n".join([hint_raw[i:i+30] for i in range(0, len(hint_raw), 30)])
         
         self.gameScreenComponents['hint'].changeTextContent(f"Hint: {hint}")
