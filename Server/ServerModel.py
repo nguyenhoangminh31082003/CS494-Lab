@@ -108,6 +108,37 @@ class ServerModel:
             statusCode=ResponseStatusCode.NICKNAME_REQUIREMENT,
             content="You need a nickname to continue the game"
         ))
+        
+    def handleCloseConnectionRequest(self, participant : ParticipantModel, participantSocket : socket.socket) -> None:
+        participantSocket.close()
+        self.selector.unregister(participantSocket)
+        content = ""
+        
+        if participant.getNickname() is None:
+            self.game.removeUnregisteredPlayer(participant)
+            content = f"Client with address {participant.address} has left the game"
+            
+        elif participant.isWatcher():
+            self.game.removeWatcher(participant)
+            self.game.removeUnregisteredPlayer(participant)
+            content = f"Watcher with address {participant.address} has left the game"
+        
+        elif participant.isWaiting():
+            content = f"Waitng with address {participant.address} has left the game"
+            self.game.removeUnregisteredPlayer(participant)
+        else:
+            content = f"Player with address {participant.address} has left the game"
+            self.game.removeRegisteredPlayer(participant)
+
+        print(f"[SERVER] {content}")
+        self.game.broadcastResponse(Response(
+            statusCode=ResponseStatusCode.BROADCASTED_MESSAGE,
+            content=content
+        ))
+        if self.game.countPlayers() > 0:
+            self.game.sendBroadcastedSummary()
+            
+        ## handle the case when no player is left
 
     def handleNicknameRequest(self, participant : ParticipantModel, nickname : str) -> bool:
         if not ParticipantModel.checkNicknameValid(nickname):
@@ -162,6 +193,9 @@ class ServerModel:
 
                 statusCode = request.getStatusCode()
                 content = request.getContent()
+                
+                if statusCode == RequestStatusCode.CLOSE_CONNECTION:
+                    self.handleCloseConnectionRequest(participant, participantSocket)
 
                 if statusCode == RequestStatusCode.NICKNAME_REQUEST:
                     

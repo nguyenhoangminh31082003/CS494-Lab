@@ -18,7 +18,7 @@ class ClientModel:
     def __init__(self):
         self.clientSocket = None
         self.nickname = None
-        self.receivedResponses = queue.Queue()  
+        self.receivedResponses = queue.Queue()
         
     def connectToServer(self, host : str, port : int) -> None:
         self.clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -36,14 +36,22 @@ class ClientModel:
         print(f"[CLIENT] Sent data: {request.toString()}")
 
     def closeConnection(self):
+        self.requestCloseConnection()
         self.clientSocket.close()
 
     def requestNickname(self, nickname : str) -> None:
         self.sendRequest(Request(RequestStatusCode.NICKNAME_REQUEST, nickname))
+        
+    def requestCloseConnection(self) -> None:
+        self.sendRequest(Request(RequestStatusCode.CLOSE_CONNECTION, "Close connection"))
 
     def listen(self):
         while True:
-            receivedData = self.clientSocket.recv(1024).decode().strip()
+            try:
+                receivedData = self.clientSocket.recv(1024).decode().strip()
+                
+            except:
+                break
             
             if receivedData:
 

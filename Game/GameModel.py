@@ -62,6 +62,15 @@ class GameModel:
     def addWatcher(self, watcher: ParticipantModel) -> None:
         self.watchers.append(watcher)
         self.sendBroadcastedSummary()
+        
+    def removeUnregisteredPlayer(self, player: ParticipantModel) -> None:
+        self.players.removeUnregisteredPlayer(player)
+    
+    def removeRegisteredPlayer(self, player: ParticipantModel) -> None:
+        self.players.removeRegisteredPlayer(player.getNickname())
+        
+    def removeWatcher(self, watcher: ParticipantModel) -> None:
+        self.watchers.remove(watcher)
 
     def ready(self) -> None:
         self.roundCount = 0
@@ -76,6 +85,9 @@ class GameModel:
             "watcher_count": len(self.watchers)
         }
 
+    def countPlayers(self) -> int:
+        return len(self.players)
+    
     def startNewMatch(self) -> bool:
 
         if self.players.countSuccessfullyRegisteredPlayers() < self.rules["required_number_of_players"]:

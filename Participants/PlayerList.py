@@ -41,6 +41,13 @@ class PlayerList:
         self.players.append(player)
         if player.isAlive():
             self.countAlivePlayers += 1
+        
+    def removeRegisteredPlayer(self, nickname) -> None:
+        position = self.findPlayerPosition(nickname)
+        self.players[position].die()
+        
+    def removeUnregisteredPlayer(self, player : ParticipantModel) -> None:
+        self.players.remove(player)
 
     def countAlivePlayers(self) -> int:
         return self.countAlivePlayers

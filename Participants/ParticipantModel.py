@@ -15,7 +15,7 @@ class ParticipantModel:
         self.address = address
         self.score = 0
         self.nickname = None
-        self.mode = PlayerMode.WATCH
+        self.mode = PlayerMode.WAIT
         self.responses = queue.Queue()
 
     def __str__(self):
@@ -50,6 +50,12 @@ class ParticipantModel:
     
     def addResponse(self, message):
         self.responses.put(message)
+    
+    def isWatcher(self):
+        return self.mode == PlayerMode.WATCH
+    
+    def isWaiting(self):
+        return self.mode == PlayerMode.WAIT
 
     def isAlive(self) -> bool:
         return self.mode != PlayerMode.DIE
