@@ -281,11 +281,17 @@ class GameModel:
             content = self.players.getRankSummary()
         ))
 
+    def getJSONRankSummary(self) -> dict:
+        return {
+            "rank_summary": self.players.getJSONRankSummary(),
+            "quiz_summary": self.quizList.getJSONSummary()
+        }
+
     def broadcastRanks(self) -> None:
 
         self.broadcastResponse(Response(
             statusCode = ResponseStatusCode.BROADCASTED_RANK,
-            content = json.dumps(self.players.getJSONRankSummary())
+            content = json.dumps(self.getJSONRankSummary())
         ))
 
     def containsUnsentResponse(self) -> bool:
