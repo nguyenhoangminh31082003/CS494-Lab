@@ -47,13 +47,64 @@ class GameGUI:
         self.guess_keyword = False
         self.client = client
         self.scoreboard = []
+        self.statistic = []
 
         self.summary = None
 
         self.timeLeft = 20
         self.ranks = None
         self.nickname = None
-
+        
+    def bindStatisticUI(self) -> bool:
+        
+        if self.rank_summary is None:
+            return False
+        
+        self.statistic.clear()
+        
+        rankInformation = self.rank_summary["ranks"]
+        
+        for i, rank in enumerate(rankInformation):
+            self.statistic.append(
+                (
+                    TextBox(
+                        textFont = AssetConstants.AMATICSC_FONT,
+                        textColor = ColorCodeTuples.WHITE,
+                        textSize = 16,
+                        textContent = f"{rank["rank"]}",
+                        containerInfo = (
+                            self.screenWidth / 2 - 100, 
+                            self.screenHeight / 3 + (i + 1) * 30, 0, 0
+                        )
+                    ),
+                    TextBox(
+                        textFont = AssetConstants.AMATICSC_FONT,
+                        textColor = ColorCodeTuples.WHITE,
+                        textSize = 16,
+                        textContent = rank["nickname"],
+                        containerInfo = (
+                            self.screenWidth / 2 - 60, 
+                            self.screenHeight / 3 + (i + 1) * 30, 0, 0
+                        )
+                    ),
+                    TextBox(
+                        textFont = AssetConstants.AMATICSC_FONT,
+                        textColor = ColorCodeTuples.WHITE,
+                        textSize = 16,
+                        textContent = f": {rank['points']}",
+                        containerInfo = (
+                            self.screenWidth / 2 + 100, 
+                            self.screenHeight / 3 + (i + 1) * 30, 0, 0
+                        ),
+                    )
+                )
+            )
+        
+        if self.nickname in self.rank_summary['winner_nicknames']:
+            self.statisticScreenComponents['label'].changeTextContent(MessageTextConstants.WIN_TEXT)
+        
+        
+    
     def bindSummaryUI(self) -> bool:
 
         if self.summary is None:
@@ -115,7 +166,7 @@ class GameGUI:
 
         self.openScreenComponents['label'] = TextBox(
             AssetConstants.AMATICSC_FONT,
-            ColorCodeTuples.BLACK,
+            ColorCodeTuples.WHITE,
             32,
             MessageTextConstants.ENTER_NICKNAME,
             (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
@@ -123,7 +174,7 @@ class GameGUI:
         
         self.waitScreenComponents['hello'] = TextBox(
             AssetConstants.AMATICSC_FONT,
-            ColorCodeTuples.BLACK,
+            ColorCodeTuples.WHITE,
             32,
             "Hello, ",
             (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 - self.screenHeight * 20 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
@@ -131,10 +182,35 @@ class GameGUI:
         
         self.waitScreenComponents['label'] = TextBox(
             AssetConstants.AMATICSC_FONT,
-            ColorCodeTuples.BLACK,
+            ColorCodeTuples.WHITE,
             32,
             MessageTextConstants.PAUSE_TEXT,
             (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
+        )
+        
+        self.statisticScreenComponents['label'] = TextBox(
+            AssetConstants.AMATICSC_FONT,
+            ColorCodeTuples.WHITE,
+            32,
+            MessageTextConstants.END_TEXT,
+            (containerBoxContainer[0], self.screenHeight / 10, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
+        )
+        
+        self.statisticScreenComponents['keyword'] = TextBox(
+            AssetConstants.AMATICSC_FONT,
+            ColorCodeTuples.WHITE,
+            20,
+            "ANSWER",
+            (containerBoxContainer[0], self.screenHeight * 2 / 10, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
+        )
+        
+        self.statisticScreenComponents['HOME'] = TextBox(
+            AssetConstants.AMATICSC_FONT,
+            ColorCodeTuples.WHITE,
+            20,
+            "HOME",
+            (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 + self.screenHeight * 13 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100),
+            True
         )
         
         self.openScreenComponents['notify'] = TextBox(
@@ -269,6 +345,37 @@ class GameGUI:
         )
 
     def initialize(self):
+        self.screenViewID = ScreenViewID.REGISTER
+        self.information = None
+        self.running = False
+        self.screen = None
+        self.submit = False
+        self.myTurn = False
+        self.clock = None
+        self.font = None
+        
+
+        self.screenWidth = None
+        self.screenHeight = None
+
+        self.openScreenComponents = dict()
+        self.waitScreenComponents = dict()
+        self.gameScreenComponents = dict()
+        self.loseScreenComponents = dict()
+        self.statisticScreenComponents = dict()
+
+        self.buttons = []
+        self.keyword_button = None 
+        self.keyword_textform = None
+        self.guess_keyword = False
+        self.scoreboard = []
+        self.statistic = []
+
+        self.summary = None
+
+        self.timeLeft = 20
+        self.rank_summary = None
+        
         pygame.init()
         
         self.information = self.getGUIInformation()
@@ -390,7 +497,7 @@ class GameGUI:
         word = self.summary["quiz"]["current_keyword"]
         wordLength = len(word)
         hint_raw = self.summary["quiz"]["hint"]
-        order = None
+        order = 0
         for i in self.summary["player"]["player_information"]:
             if i["nickname"] == self.nickname:
                 order = i["order"]
@@ -443,7 +550,7 @@ class GameGUI:
                 self.client.sendLetterGuess(" ")
             self.submit = True
             
-        if position and self.myTurn and round > order:
+        if position and self.myTurn and order:
             if self.keyword_button.isClicked(position):
                 self.keyword_textform.alterSelection()
                 
@@ -486,16 +593,32 @@ class GameGUI:
             element.draw(self.screen)
         
     def displayStatisticScreen(self):
+        pos = None
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
                 pygame.quit()
                 return
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+        
+        if pos and self.statisticScreenComponents['HOME'].isClicked(pos):
+            self.screenViewID = ScreenViewID.REGISTER
+            self.initialize()
        
         self.screen.blit(self.inGameImage, (0, 0))
         
         for element in self.statisticScreenComponents.values():
             element.draw(self.screen)
+        
+        for stat in self.statistic:
+            stat[0].draw(self.screen)
+            stat[1].draw(self.screen)
+            stat[2].draw(self.screen)
+            if stat[1].textContent == self.nickname:
+                stat[0].changeColor(ColorCodeTuples.GREEN)
+                stat[1].changeColor(ColorCodeTuples.GREEN)
+                stat[2].changeColor(ColorCodeTuples.GREEN)
         
     def analyzeResponse(self) -> bool:
         response = self.client.getReceivedResponse()
@@ -512,6 +635,12 @@ class GameGUI:
             self.bindSummaryUI()
 
             print(f"[CLIENT] Received summary: {json.dumps(self.summary, indent = 4)}")
+            
+        if statusCode == ResponseStatusCode.BROADCASTED_RANK:
+            self.rank_summary = json.loads(content)
+            
+            self.bindStatisticUI()
+            self.screenViewID = ScreenViewID.STATISTIC
             
         elif statusCode == ResponseStatusCode.QUESTION_SENT:
             self.resetTimer()
