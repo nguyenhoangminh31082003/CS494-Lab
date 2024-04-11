@@ -60,7 +60,5 @@ class ClientModel:
             print(f"!!![CLIENT] Returning response: {response.toString()}")
 
             return response 
-
-            return self.receivedResponses.get()
         
         return None

@@ -57,14 +57,24 @@ class GameModel:
         
     def addPlayer(self, player: ParticipantModel) -> None:
         self.players.addPlayer(player)
+        self.sendBroadcastedSummary()
 
     def addWatcher(self, watcher: ParticipantModel) -> None:
         self.watchers.append(watcher)
+        self.sendBroadcastedSummary()
 
     def ready(self) -> None:
         self.roundCount = 0
         self.status = GameStatus.READY
         self.quizList.chooseRandomQuiz()
+
+    def getClientCountSummary(self) -> dict:
+        return {
+            "required_number_of_players": self.rules["required_number_of_players"],
+            "player_count": len(self.players),
+            "successfully_registered_player_count": self.players.countSuccessfullyRegisteredPlayers(),
+            "watcher_count": len(self.watchers)
+        }
 
     def startNewMatch(self) -> bool:
 
@@ -113,7 +123,8 @@ class GameModel:
             "round_count": self.roundCount,
             "player": self.players.getJSONSummary(),
             "quiz": self.quizList.getJSONSummary(),
-            "guessed_characters": self.guessedCharacters
+            "guessed_characters": self.guessedCharacters,
+            "client_count_summary": self.getClientCountSummary()
         }
 
         return result
