@@ -50,6 +50,7 @@ class GameGUI:
 
         self.timeLeft = 20
         self.ranks = None
+        self.nickname = None
 
     def bindSummaryUI(self) -> bool:
 
@@ -481,7 +482,13 @@ class GameGUI:
         elif statusCode == ResponseStatusCode.NICKNAME_ACCEPTED:
             self.screenViewID = ScreenViewID.WAIT
             self.waitScreenComponents['hello'].changeTextContent(f"Hello, {self.nickname}!")
-        elif statusCode == ResponseStatusCode.GAME_STARTED or statusCode == ResponseStatusCode.GAME_FULL:
+    
+        elif statusCode == ResponseStatusCode.GAME_FULL:
+            self.nickname = "Watcher"   
+            self.screenViewID = ScreenViewID.WAIT
+            self.waitScreenComponents['hello'].changeTextContent(f"Hello, {self.nickname}!")
+    
+        elif statusCode == ResponseStatusCode.GAME_STARTED:
             self.screenViewID = ScreenViewID.GAME
         
 

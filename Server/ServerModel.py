@@ -77,12 +77,12 @@ class ServerModel:
             watcher = ParticipantModel(connection, address)
             watcher.becomeWatcher()
 
+            self.game.addWatcher(watcher)
+
             watcher.addResponse(Response(
                 statusCode=ResponseStatusCode.GAME_FULL,
                 content="Sorry, the game is full. You can only watch the game"
             ))
-
-            self.game.addWatcher(watcher)
 
             self.selector.register(connection, selectors.EVENT_READ | selectors.EVENT_WRITE, data = watcher)
             
