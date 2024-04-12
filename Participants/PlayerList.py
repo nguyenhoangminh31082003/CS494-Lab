@@ -61,6 +61,12 @@ class PlayerList:
     def checkNicknameExist(self, nickname : str) -> bool:
         return self.findPlayerPosition(nickname) >= 0
 
+    def getPlayerWithNickname(self, nickname : str) -> ParticipantModel:
+        position = self.findPlayerPosition(nickname)
+        if position >= 0:
+            return self.players[position]
+        return None
+
     def getFormattedSummary(self) -> str:
         resultLines = [
             f"Current player: {self.players[self.currentID].getNickname()}",
@@ -117,7 +123,6 @@ class PlayerList:
             })
 
         return result
-
 
     def getRankSummary(self) -> str:
         winners = []
