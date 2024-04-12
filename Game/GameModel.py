@@ -63,10 +63,10 @@ class GameModel:
 
     def reallowPlayerWithNickname(self, nickname: str) -> bool:
 
-        if self.players.getPlayerWithNickname(nickname).isAlive():
+        if self.players.getPlayerWithNickname(nickname).isWaiting():
             return False
 
-        self.players.resetPlayerWithNickname(nickname)
+        self.players.requirePlayerWithNicknameToWait(nickname)
         self.sendBroadcastedSummary()
 
         return True
@@ -108,8 +108,10 @@ class GameModel:
     
     def startNewMatch(self) -> bool:
 
-        if (self.players.countSuccessfullyRegisteredPlayers() < self.rules["required_number_of_players"]) or (not self.players.areAllAlive()):
+        if (self.players.countSuccessfullyRegisteredPlayers() < self.rules["required_number_of_players"]) or (not self.players.areAllWaiting()):
             return False
+        
+        self.players.resetAllPlayers()
 
         self.status = GameStatus.RUNNING
 
@@ -118,9 +120,9 @@ class GameModel:
         self.startTime = time.time()
 
         self.sendBroadcastedSummary()
-            
+
         self.broadcastSummary()
-    
+
         self.broadcastResponse(Response(
             statusCode = ResponseStatusCode.GAME_STARTED,
             content = "Game started!!!"

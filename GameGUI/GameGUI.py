@@ -668,7 +668,7 @@ class GameGUI:
 
             self.bindSummaryUI()
 
-            print(f"[CLIENT] Received summary: {json.dumps(self.summary, indent = 4)}")
+            #print(f"[CLIENT] Received summary: {json.dumps(self.summary, indent = 4)}")
             
         elif statusCode == ResponseStatusCode.NICKNAME_ALREADY_TAKEN:
             self.openScreenComponents['notify'].changeTextContent(MessageTextConstants.ERROR_MESSAGE_REGISTER)
