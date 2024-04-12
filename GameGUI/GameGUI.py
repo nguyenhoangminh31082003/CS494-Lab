@@ -105,9 +105,7 @@ class GameGUI:
         
         if self.nickname in self.rankSummary['rank_summary']['winner_nicknames']:
             self.statisticScreenComponents['label'].changeTextContent(MessageTextConstants.WIN_TEXT)
-        
-        
-    
+         
     def bindSummaryUI(self) -> bool:
 
         if self.summary is None:
@@ -298,7 +296,6 @@ class GameGUI:
             containerInfo = (self.screenWidth * 9 / 10, self.screenHeight / 10 + 120, 0, 0),
         )
         
-        
         self.gameScreenComponents['Timer'] = TextBox(
             textFont = AssetConstants.AMATICSC_FONT,
             textColor = ColorCodeTuples.WHITE,
@@ -330,7 +327,6 @@ class GameGUI:
             maxChar = 30
         )
             
-
     def initializeImages(self):
         self.backgroundImage = pygame.transform.scale(
             AssetConstants.INTRO, 

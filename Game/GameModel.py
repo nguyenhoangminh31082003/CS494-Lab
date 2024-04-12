@@ -61,9 +61,15 @@ class GameModel:
         self.players.addPlayer(player)
         self.sendBroadcastedSummary()
 
-    def reallowPlayerWithNickname(self, nickname: str) -> None:
+    def reallowPlayerWithNickname(self, nickname: str) -> bool:
+
+        if self.players.getPlayer(nickname).isAlive():
+            return False
+
         self.players.reallowPlayerWithNickname(nickname)
         self.sendBroadcastedSummary()
+
+        return True
 
     def addWatcher(self, watcher: ParticipantModel) -> None:
         self.watchers.append(watcher)

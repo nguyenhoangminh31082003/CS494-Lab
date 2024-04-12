@@ -180,7 +180,8 @@ class ServerModel:
         
         nickname = participant.getNickname()
 
-        self.game.reallowPlayerWithNickname(nickname)
+        if not self.game.reallowPlayerWithNickname(nickname):
+            return False
 
         participant.addResponse(Response(
             statusCode=ResponseStatusCode.WAIT_GAME_START_REQUIRE,
