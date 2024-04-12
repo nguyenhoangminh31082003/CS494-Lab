@@ -223,8 +223,11 @@ class GameModel:
             if not self.moveTurnToNextPlayer():
                 self.end()
                 return True
+            
+            self.requireCurrentPlayerAnswer()
             self.startTime = time.time()
             self.secondCount = self.timeout - int(time.time() - self.startTime)
+            self.sendBroadcastedSummary()
 
         return False
 

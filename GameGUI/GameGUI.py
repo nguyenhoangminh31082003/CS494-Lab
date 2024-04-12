@@ -672,8 +672,15 @@ class GameGUI:
             self.initializeScreenComponents()
         elif statusCode == ResponseStatusCode.GAME_FULL:
             self.nickname = "Watcher"   
-            self.screenViewID = ScreenViewID.WAIT
-            self.waitScreenComponents['hello'].changeTextContent(f"Hello, {self.nickname}!")
+            
+            started = json.loads(content)["game_started"]
+            
+            if started:
+                self.screenViewID = ScreenViewID.GAME
+            else:
+                self.screenViewID = ScreenViewID.WAIT
+                self.waitScreenComponents['hello'].changeTextContent(f"Hello, {self.nickname}!")
+                
         elif statusCode == ResponseStatusCode.GAME_STARTED:
             self.screenViewID = ScreenViewID.GAME
         elif statusCode == ResponseStatusCode.RESTART_ALLOWED:

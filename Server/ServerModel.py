@@ -78,8 +78,11 @@ class ServerModel:
             self.game.addWatcher(watcher)
 
             watcher.addResponse(Response(
-                statusCode=ResponseStatusCode.GAME_FULL,
-                content="Sorry, the game is full. You can only watch the game"
+                statusCode = ResponseStatusCode.GAME_FULL,
+                content = json.dumps({
+                    "message": "The game is full. You can only watch the game.",
+                    "game_started": self.game.getStatus().isRunning()
+                })
             ))
 
             self.selector.register(connection, selectors.EVENT_READ | selectors.EVENT_WRITE, data = watcher)
