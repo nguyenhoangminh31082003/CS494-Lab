@@ -30,6 +30,7 @@ class GameGUI:
         self.myTurn = False
         self.clock = None
         self.font = None
+        self.validateName = True
         
 
         self.screenWidth = None
@@ -379,6 +380,7 @@ class GameGUI:
     def initialize(self):
         self.screenViewID = ScreenViewID.REGISTER
         self.information = None
+        self.validateName = True
         self.running = False
         self.screen = None
         self.submit = False
@@ -667,6 +669,12 @@ class GameGUI:
             self.bindSummaryUI()
 
             print(f"[CLIENT] Received summary: {json.dumps(self.summary, indent = 4)}")
+            
+        elif statusCode == ResponseStatusCode.NICKNAME_ALREADY_TAKEN:
+            self.openScreenComponents['notify'].changeTextContent(MessageTextConstants.ERROR_MESSAGE_REGISTER)
+        
+        elif statusCode == ResponseStatusCode.INVALID_NICKNAME:
+            self.openScreenComponents['notify'].changeTextContent(MessageTextConstants.INVALID_MESSAGE_REGISTER)
             
         elif statusCode == ResponseStatusCode.BROADCASTED_RANK:
             self.rankSummary = json.loads(content)
