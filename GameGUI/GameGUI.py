@@ -62,8 +62,10 @@ class GameGUI:
             return False
         
         self.statistic.clear()
-        
+        keyword = self.summary["quiz_summary"]["current_keyword"]
         rankInformation = self.rankSummary['rank_summary']["ranks"]
+        
+        self.statisticScreenComponents['keyword'].changeTextContent(f"ANSWER: {keyword}")
         
         for i, rank in enumerate(rankInformation):
             self.statistic.append(
@@ -161,11 +163,20 @@ class GameGUI:
             self.screenHeight * 332 / 563
         )
         
+        self.statisticScreenComponents['RESTART'] = TextBox(
+            AssetConstants.AMATICSC_FONT,
+            ColorCodeTuples.WHITE,
+            20,
+            "RESTART",
+            (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 + self.screenHeight * 13 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100),
+            True
+        )
+        
         self.font = pygame.font.Font(AssetConstants.AMATICSC_FONT, 20)
 
         self.openScreenComponents['label'] = TextBox(
             textFont = AssetConstants.AMATICSC_FONT,
-            textColor = ColorCodeTuples.WHITE,
+            textColor = ColorCodeTuples.BLACK,
             textSize = 32,
             textContent = MessageTextConstants.ENTER_NICKNAME,
             containerInfo = (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
@@ -318,7 +329,7 @@ class GameGUI:
             
     def initializeImages(self):
         self.backgroundImage = pygame.transform.scale(
-            AssetConstants.MENU, 
+            AssetConstants.INTRO, 
             (
                 self.screenWidth, 
                 self.screenHeight
@@ -326,7 +337,15 @@ class GameGUI:
         )
 
         self.inGameImage = pygame.transform.scale(
-            AssetConstants.BACKGROUND, 
+            AssetConstants.INGAME, 
+            (
+                self.screenWidth, 
+                self.screenHeight
+            )
+        )
+        
+        self.statImage = pygame.transform.scale(
+            AssetConstants.CHEST, 
             (
                 self.screenWidth, 
                 self.screenHeight
@@ -483,7 +502,7 @@ class GameGUI:
     def displayMatchScreen(self):
         
         round = self.summary["round_count"]
-        word = self.summary["quiz"]["current_keyword"]
+        word = self.summary["quiz"]["current_keyword"].upper()
         wordLength = len(word)
         hint = self.summary["quiz"]["hint"]
         order = self.summary['turn_count']
@@ -587,7 +606,10 @@ class GameGUI:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
         
-        self.screen.blit(self.inGameImage, (0, 0))
+        self.screen.blit(self.statImage, (0, 0))
+        
+        if pos and self.statisticScreenComponents['RESTART'].isClicked(pos):
+            self.client.requestRestartNewMatch()
         
         for element in self.statisticScreenComponents.values():
             element.draw(self.screen)

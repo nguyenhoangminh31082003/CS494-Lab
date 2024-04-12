@@ -62,6 +62,9 @@ class ClientModel:
         
     def requestCloseConnection(self) -> None:
         self.sendRequest(Request(RequestStatusCode.CLOSE_CONNECTION, "Close connection"))
+        
+    def requestRestartNewMatch(self) -> None:
+        self.sendRequest(Request(RequestStatusCode.RESTART_NEW_MATCH, "Restart new match"))
 
     def listen(self):
         while True:
