@@ -96,6 +96,12 @@ class GameModel:
             "successfully_registered_player_count": self.players.countSuccessfullyRegisteredPlayers(),
             "watcher_count": len(self.watchers)
         }
+    
+    def broadcastCloseConnection(self) -> None:
+        self.broadcastResponse(Response(
+            statusCode = ResponseStatusCode.SERVER_CLOSE_CONNECTION,
+            content = "Server is shutting down!!!"
+        ))
 
     def countPlayers(self) -> int:
         return len(self.players)

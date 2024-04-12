@@ -688,20 +688,19 @@ class GameGUI:
             self.initializeScreenComponents()
         elif statusCode == ResponseStatusCode.GAME_FULL:
             self.nickname = "Watcher"   
-            
             started = json.loads(content)["game_started"]
-            
             if started:
                 self.screenViewID = ScreenViewID.GAME
             else:
                 self.screenViewID = ScreenViewID.WAIT
                 self.waitScreenComponents['hello'].changeTextContent(f"Hello, {self.nickname}!")
-                
         elif statusCode == ResponseStatusCode.GAME_STARTED:
             self.screenViewID = ScreenViewID.GAME
         elif statusCode == ResponseStatusCode.RESTART_ALLOWED:
             self.restartAllowance = True
             self.initializeKeyboard()
+        elif statusCode == ResponseStatusCode.SERVER_CLOSE_CONNECTION:
+            self.running = False
 
         return True
 
@@ -734,4 +733,5 @@ class GameGUI:
 
             pygame.display.update()
         
+        pygame.quit()
         self.client.closeConnection()

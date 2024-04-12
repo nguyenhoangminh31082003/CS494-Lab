@@ -16,6 +16,7 @@ class ResponseStatusCode(enum.IntEnum):
     BROADCASTED_RANK = 14
     RESTART_ALLOWED = 15
     WAIT_GAME_START_REQUIRED = 16
+    SERVER_CLOSE_CONNECTION = 17
 
     def isNicknameRelated(self) -> bool:
         return self in [
