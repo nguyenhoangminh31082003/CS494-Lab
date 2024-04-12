@@ -1,6 +1,6 @@
+import sys
 import random
 import json
-import sys
 import os
 
 from ParticipantModel import ParticipantModel
