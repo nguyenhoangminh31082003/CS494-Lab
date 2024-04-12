@@ -248,7 +248,7 @@ class GameGUI:
             textFont = AssetConstants.AMATICSC_FONT,
             textColor = ColorCodeTuples.WHITE,
             textSize = 30,
-            textContent = "abcxyzk - Round: 1",
+            textContent = "abcxyzfgkh - Round: 1",
             containerInfo = (containerBoxContainer[0], self.screenHeight / 10, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100),
             border = True
         )
@@ -501,11 +501,11 @@ class GameGUI:
         
     def displayMatchScreen(self):
         
-        round = self.summary["round_count"]
-        word = self.summary["quiz"]["current_keyword"].upper()
+        round = self.summary["round_count"] + 1
+        word = self.summary["quiz"]["current_keyword"]
         wordLength = len(word)
         hint = self.summary["quiz"]["hint"]
-        order = self.summary['turn_count']
+        order = self.summary['turn_count'] + 1
         
         
         self.gameScreenComponents['hint'].changeTextContent(f"Hint: {hint}")
@@ -554,7 +554,7 @@ class GameGUI:
                 self.client.sendLetterGuess(" ")
             self.submit = True
             
-        if position and self.myTurn and order:
+        if position and self.myTurn and order > 2:
             if self.keyword_button.isClicked(position):
                 self.keyword_textform.alterSelection()
                 
@@ -566,7 +566,7 @@ class GameGUI:
             pygame.draw.line(self.screen, ColorCodeTuples.WHITE, (x1, y1), (x2, y2), 2)
             # draw the word
             text = self.font.render(word[i], True, ColorCodeTuples.WHITE)
-            self.screen.blit(text, (x1 - text.get_width() + 13, y1 - 30))
+            self.screen.blit(text, (x1 - text.get_width() / 2 + 10, y1 - 30))
         
         playerInformation = self.summary["player"]["player_information"]
         currentPlayerNickname = self.summary["player"]["current_player"]
@@ -608,7 +608,7 @@ class GameGUI:
         
         self.screen.blit(self.statImage, (0, 0))
         
-        if pos and self.statisticScreenComponents['RESTART'].isClicked(pos):
+        if pos and self.statisticScreenComponents['RESTART'].isClicked(pos) and self.restartAllowance:
             self.client.requestRestartNewMatch()
         
         for element in self.statisticScreenComponents.values():
