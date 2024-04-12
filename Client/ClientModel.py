@@ -1,15 +1,16 @@
 import threading
 import socket
+import queue
 import json
-import re
 import sys
+import re
 
 sys.path.append("../")
 sys.path.append("./Message/")
 
 from Request import Request
-from RequestStatusCode import RequestStatusCode
 from Response import Response
+from RequestStatusCode import RequestStatusCode
 from ResponseStatusCode import ResponseStatusCode
 
 class ClientModel:
@@ -17,89 +18,75 @@ class ClientModel:
     def __init__(self):
         self.clientSocket = None
         self.nickname = None
-        self.summary = None
+        self.receivedResponses = queue.Queue()
         
     def connectToServer(self, host : str, port : int) -> None:
         self.clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.clientSocket.connect((host, port))
 
     def sendRequest(self, request : Request) -> None:
-        self.clientSocket.send(request.toString().encode())
+        message = request.toString().encode("utf-8")
 
-    def handleRegistration(self, statusCode: ResponseStatusCode, content: str) -> None:
-        if statusCode == ResponseStatusCode.NICKNAME_ACCEPTED:
-            print(content)
-            return
+        length = len(message)
 
-        self.nickname = None
-                
-        if statusCode == ResponseStatusCode.NICKNAME_REQUIREMENT:
-            self.nickname = input("Please enter your nickname: ")
-        elif statusCode == ResponseStatusCode.INVALID_NICKNAME:
-            self.nickname = input("The chosen nickname is not valid. Please enter a valid nickname: ")
-        elif statusCode == ResponseStatusCode.NICKNAME_ALREADY_TAKEN:
-            self.nickname = input("The chosen nickname is already taken. Please enter another nickname: ")
-                
-        if self.nickname is not None:
-            self.sendRequest(Request(
-                statusCode = RequestStatusCode.NICKNAME_REQUEST, 
-                content = self.nickname
-            ))
+        message += b" " * (1024 - length)
 
-    def handleAnswerSubmission(self, turnDetails: dict) -> None:
-            
-        guessedCharacter = input("Please guess a character: ")
-        guessedKeyword = None
+        self.clientSocket.send(message)
 
-        if turnDetails["keyword_guess_allowance"]:
-            guessedKeyword = input("Please guess the keyword (enter nothing if you do not want go guess): ")
-            if guessedKeyword == "": 
-                guessedKeyword = None
+        print(f"[CLIENT] Sent data: {request.toString()}")
 
+    def closeConnection(self):
+        self.requestCloseConnection()
+        self.clientSocket.close()
+
+    def requestNickname(self, nickname : str) -> None:
+        self.sendRequest(Request(RequestStatusCode.NICKNAME_REQUEST, nickname))
+        
+    def sendLetterGuess(self, letter : str) -> None:
+        self.sendRequest(Request(
+            statusCode = RequestStatusCode.ANSWER_SUBMISSION,
+            content = json.dumps({
+                "guessed_character": letter,
+                "guessed_keyword": None,
+            })
+        ))
+    
+    def sendWordGuess(self, word : str) -> None:
         self.sendRequest(Request(
         statusCode = RequestStatusCode.ANSWER_SUBMISSION,
             content = json.dumps({
-                "guessed_character": guessedCharacter,
-                "guessed_keyword": guessedKeyword
+                "guessed_keyword": word,
+                "guessed_character": None,
             })
         ))
-
-    def closeConnection(self):
-        self.clientSocket.close()
+        
+    def requestCloseConnection(self) -> None:
+        self.sendRequest(Request(RequestStatusCode.CLOSE_CONNECTION, "Close connection"))
+        
+    def requestRestartNewMatch(self) -> None:
+        self.sendRequest(Request(RequestStatusCode.RESTART_NEW_MATCH, "Restart new match"))
 
     def listen(self):
         while True:
-            receivedData = self.clientSocket.recv(1024).decode()
+            try:
+                receivedData = self.clientSocket.recv(1024).decode().strip()
+            except:
+                break
             
             if receivedData:
-                response = Response.getDeserializedResponse(receivedData)
 
-                statusCode = response.getStatusCode()
-                content = response.getContent()
+                #print(f"[CLIENT] Received data: {receivedData}")
 
-                if statusCode.isNicknameRelated():
-                    self.handleRegistration(statusCode, content)        
-                elif statusCode == ResponseStatusCode.BROADCASTED_MESSAGE:
-                    print(content)
-                elif statusCode == ResponseStatusCode.BROADCASTED_SUMMARY:
-                    self.summary = json.loads(content)
-                    #print(json.dumps(self.summary, indent = 4))
-                elif statusCode == ResponseStatusCode.GAME_FULL:
-                    print(content)
-                    #This block might be changed in the future
-                elif statusCode == ResponseStatusCode.GAME_ENDED:
-                    print(content)
-                    self.closeConnection()
-                    break
-                elif statusCode == ResponseStatusCode.QUESTION_SENT:
-                    question = json.loads(content)
-                elif statusCode == ResponseStatusCode.ANSWER_REQUIRED:
-                    self.handleAnswerSubmission(json.loads(content))
+                self.receivedResponses.put(Response.getDeserializedResponse(receivedData))
 
-    def run(self):
+    def getReceivedResponse(self):
+
+        if not self.receivedResponses.empty():   
+
+            response = self.receivedResponses.get()
+
+            #print(f"!!![CLIENT] Returning response: {response.toString()}")
+
+            return response 
         
-        listeningThread = threading.Thread(target = self.listen)
-        
-        listeningThread.start()            
-
-        listeningThread.join()
+        return None

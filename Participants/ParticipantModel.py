@@ -15,11 +15,14 @@ class ParticipantModel:
         self.address = address
         self.score = 0
         self.nickname = None
-        self.mode = PlayerMode.WATCH
+        self.mode = PlayerMode.WAIT
         self.responses = queue.Queue()
 
     def __str__(self):
         return f"ParticipantModel({self.nickname}, {self.address})"
+
+    def getMode(self) -> PlayerMode:
+        return self.mode
 
     @staticmethod
     def checkNicknameValid(nickname: str) -> bool:
@@ -38,6 +41,9 @@ class ParticipantModel:
     def reset(self):
         self.score = 0
         self.mode = PlayerMode.PLAY
+
+    def wait(self):
+        self.mode = PlayerMode.WAIT
         
     def increaseScore(self, score : int):
         self.score += score
@@ -50,6 +56,12 @@ class ParticipantModel:
     
     def addResponse(self, message):
         self.responses.put(message)
+    
+    def isWatcher(self):
+        return self.mode == PlayerMode.WATCH
+    
+    def isWaiting(self):
+        return self.mode == PlayerMode.WAIT
 
     def isAlive(self) -> bool:
         return self.mode != PlayerMode.DIE
@@ -60,11 +72,15 @@ class ParticipantModel:
 
             message = self.responses.get().toString().encode("utf-8")
 
-            #Somehow we need this line to avoid an error at client when client tries to deserialize the message
-            print(f"[SERVER] Sending response to {self.nickname} ({self.address}): {message}")
+            length = len(message)
+
+            message += b" " * (1024 - length)
 
             try:
                 socket.sendall(message)
+
+                print(f"[SERVER] Sent message: {message}")
+         
             except:
                 return False
             

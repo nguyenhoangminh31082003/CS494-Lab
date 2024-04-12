@@ -1,12 +1,11 @@
 import threading
 import selectors
-import time
-import sys
 import socket
 import json
+import time
+import sys
 import os
 
-import sys
 sys.path.append("./Message/")
 sys.path.append("./Participants/")
 sys.path.append("./Game/")
@@ -30,8 +29,10 @@ class ServerModel:
         self.isRunning = False
 
     @staticmethod
-    def getStoredServerInformation():
-        if not os.path.exists("./Data/server_information.json"):
+    def getStoredServerInformation() -> dict:
+        fileName = "./Data/server_information.json"
+
+        if not os.path.exists(fileName):
             return {
                 "host": "127.0.0.1",
                 "port": 12000,
@@ -40,7 +41,7 @@ class ServerModel:
                 "format": "utf-8"
             }
         
-        with open("./Data/server_information.json", "r") as file:
+        with open(fileName, "r") as file:
             return json.load(file)
 
     def createListeningSocketAndSelector(self) -> bool:
@@ -60,11 +61,16 @@ class ServerModel:
 
     def closeConnections(self):
         self.listeningSocket.close()
-        self.selector.unregister(self.listeningSocket)
 
+        try:
 
+            self.selector.unregister(self.listeningSocket)
+            
+            self.selector.close()
 
-        self.selector.close()
+        except:
+
+            print("[SERVER] Selector is closed")
 
     def handleConnectionRequest(self, key, mask):
 
@@ -76,12 +82,15 @@ class ServerModel:
             watcher = ParticipantModel(connection, address)
             watcher.becomeWatcher()
 
-            watcher.addResponse(Response(
-                statusCode=ResponseStatusCode.GAME_FULL,
-                content="Sorry, the game is full. You can only watch the game"
-            ))
-
             self.game.addWatcher(watcher)
+
+            watcher.addResponse(Response(
+                statusCode = ResponseStatusCode.GAME_FULL,
+                content = json.dumps({
+                    "message": "The game is full. You can only watch the game.",
+                    "game_started": self.game.getStatus().isRunning()
+                })
+            ))
 
             self.selector.register(connection, selectors.EVENT_READ | selectors.EVENT_WRITE, data = watcher)
             
@@ -106,12 +115,36 @@ class ServerModel:
             statusCode=ResponseStatusCode.NICKNAME_REQUIREMENT,
             content="You need a nickname to continue the game"
         ))
+        
+    def handleCloseConnectionRequest(self, participant : ParticipantModel, participantSocket : socket.socket) -> None:
+        participantSocket.close()
+        self.selector.unregister(participantSocket)
+        content = str()
 
-    def startGame(self):
-        if self.game.startNewGame():
-            self.game.broadcastSummary()
+        if participant.isWatcher():
+            self.game.removeWatcher(participant)
+            content = f"Watcher with address {participant.address} has left the game"
+        elif participant.getNickname() is None:
+            self.game.removeUnregisteredPlayer(participant)
+            content = f"Client with address {participant.address} has left the game"
+        elif participant.isWaiting():
+            content = f"Waiting with address {participant.address} has left the game"
+            self.game.removeUnregisteredPlayer(participant)
+        else:
+            content = f"Player with address {participant.address} has left the game"
+            self.game.removeRegisteredPlayer(participant)
+
+        print(f"[SERVER] {content}")
+        
+        self.game.broadcastResponse(Response(
+            statusCode=ResponseStatusCode.BROADCASTED_MESSAGE,
+            content=content
+        ))
+
+        if self.game.countPlayers() > 0:
             self.game.sendBroadcastedSummary()
-            self.game.requireCurrentPlayerAnswer()
+            
+        ## handle the case when no player is left
 
     def handleNicknameRequest(self, participant : ParticipantModel, nickname : str) -> bool:
         if not ParticipantModel.checkNicknameValid(nickname):
@@ -142,11 +175,27 @@ class ServerModel:
             content=f"Player with address {participant.address} has set the nickname as {nickname}"
         ))
 
+        self.game.sendBroadcastedSummary()
+
         print(f"[SERVER] Player with address {participant.address} has set the nickname as {nickname}")
 
-        self.startGame()
+        self.game.startNewMatch()
 
         return True
+    
+    def handleRestartRequest(self, participant : ParticipantModel) -> bool:
+        
+        nickname = participant.getNickname()
+
+        if not self.game.reallowPlayerWithNickname(nickname):
+            return False
+
+        participant.addResponse(Response(
+            statusCode=ResponseStatusCode.WAIT_GAME_START_REQUIRED,
+            content= f"Registration Completed Successfully. You will have {self.game.findPlayerPosition(nickname)}-th turn in the game"
+        ))
+
+        return self.game.startNewMatch()
 
     def serveConnection(self, key, mask):
         participantSocket = key.fileobj
@@ -156,12 +205,19 @@ class ServerModel:
             receivedData = participantSocket.recv(1024)
 
             if receivedData:
-                request = Request.getDeserializedRequest(receivedData.decode(self.rules["format"]))
+                receivedData = receivedData.decode().strip()
+
+                print(f"[SERVER] Received data: {receivedData}")
+
+                request = Request.getDeserializedRequest(receivedData)
 
                 statusCode = request.getStatusCode()
                 content = request.getContent()
+                
+                if statusCode == RequestStatusCode.CLOSE_CONNECTION:
+                    self.handleCloseConnectionRequest(participant, participantSocket)
 
-                if statusCode == RequestStatusCode.NICKNAME_REQUEST:
+                elif statusCode == RequestStatusCode.NICKNAME_REQUEST:
                     
                     self.handleNicknameRequest(
                         participant = participant, 
@@ -171,10 +227,15 @@ class ServerModel:
                 elif statusCode == RequestStatusCode.ANSWER_SUBMISSION:
                     self.game.handleAnswerSubmission(json.loads(content))
 
+                elif statusCode == RequestStatusCode.RESTART_NEW_MATCH:
+                    self.handleRestartRequest(participant)
+
         if (mask & selectors.EVENT_WRITE):
             participant.sendResponse(participantSocket)
 
     def listen(self):
+
+        administratorAnswer = "yes"
 
         while self.game.getStatus().isNotOff():
 
@@ -186,8 +247,27 @@ class ServerModel:
                 else:
                     self.serveConnection(key, mask)
 
-            if self.game.getStatus().isEnded() and (not self.game.containsUnsentResponse()):
-                self.game.stop()
+            if administratorAnswer == "yes":
+
+                if self.game.getStatus().isEnded() and (not self.game.containsUnsentResponse()):
+                    while True:
+                        administratorAnswer = input("Do you want to restart the game? (yes/no): ").lower()
+                        if administratorAnswer == "yes":
+                            self.game.prepareForRestart()
+                            break
+                        elif administratorAnswer == "no":
+                            self.game.broadcastCloseConnection()
+                            break
+                        else:
+                            print("Invalid answer. Please try again.")
+
+                if self.game.getStatus().isRunning():
+                    self.game.handleTimer()
+            else:
+
+                if not self.game.containsUnsentResponse():
+                    self.game.stop()
+                    break
 
     def readPlayerCountRequirement(self) -> int:
         N = 0
@@ -205,29 +285,22 @@ class ServerModel:
 
         self.isRunning = True
 
-        while True:
+        N = self.readPlayerCountRequirement()
 
-            N = self.readPlayerCountRequirement()
+        self.createListeningSocketAndSelector()
 
-            self.createListeningSocketAndSelector()
+        self.game.setPlayerCountRequirement(N)
 
-            self.game.setPlayerCountRequirement(N)
+        self.game.ready()
 
-            self.game.ready()
-
-            listeningThread = threading.Thread(target = self.listen)
+        listeningThread = threading.Thread(target = self.listen)
         
-            listeningThread.start()
+        listeningThread.start()
 
-            print(f"[SERVER] Server is running on {self.rules['host']}:{self.rules['port']} and starts listening")
+        print(f"[SERVER] Server is running on {self.rules['host']}:{self.rules['port']} and starts listening")
 
-            listeningThread.join()
+        listeningThread.join()
 
-            self.closeConnections()
-
-            N = input("Do you want to start the another game? Please type 'Yes' in any case if you want to start the another game: ").lower()
-            if N != "yes":
-                print("See you later")
-                break
+        self.closeConnections()
 
         self.isRunning = False

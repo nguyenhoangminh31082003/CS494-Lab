@@ -41,6 +41,13 @@ class PlayerList:
         self.players.append(player)
         if player.isAlive():
             self.countAlivePlayers += 1
+        
+    def removeRegisteredPlayer(self, nickname) -> None:
+        position = self.findPlayerPosition(nickname)
+        self.players[position].die()
+        
+    def removeUnregisteredPlayer(self, player : ParticipantModel) -> None:
+        self.players.remove(player)
 
     def countAlivePlayers(self) -> int:
         return self.countAlivePlayers
@@ -53,6 +60,12 @@ class PlayerList:
     
     def checkNicknameExist(self, nickname : str) -> bool:
         return self.findPlayerPosition(nickname) >= 0
+
+    def getPlayerWithNickname(self, nickname : str) -> ParticipantModel:
+        position = self.findPlayerPosition(nickname)
+        if position >= 0:
+            return self.players[position]
+        return None
 
     def getFormattedSummary(self) -> str:
         resultLines = [
@@ -78,6 +91,35 @@ class PlayerList:
                 "nickname": player.getNickname(),
                 "points": player.score,
                 "alive": player.isAlive()
+            })
+
+        return result
+    
+    def getJSONRankSummary(self) -> dict:
+        playerCount = len(self.players)
+        indices = list(range(playerCount))
+        indices.sort(key = lambda x: self.players[x].score, reverse = True)
+        points = -1
+        rank = 0
+        result = {
+            "player_count": playerCount,
+            "ranks": [],
+            "winner_nicknames": []
+        }
+
+        for i, index in enumerate(indices):
+            score = self.players[index].score
+            if points != score:
+                points = score
+                rank = i + 1
+            if rank == 1:
+                result["winner_nicknames"].append(self.players[index].getNickname())
+
+            result["ranks"].append({
+                "order": index,
+                "nickname": self.players[index].getNickname(),
+                "points": score,
+                "rank": rank
             })
 
         return result
@@ -111,7 +153,7 @@ class PlayerList:
         return "\n".join(resultLines)
     
     def countSuccessfullyRegisteredPlayers(self) -> int:
-        return len([player for player in self.players if player.getNickname() is not None])
+        return len([player for player in self.players if (player.getNickname() is not None) and player.isAlive()])
     
     def moveTurnToNextPlayer(self) -> bool:
         playerCount = len(self.players)
@@ -138,3 +180,29 @@ class PlayerList:
         self.countAlivePlayers -= 1
         
         return self.countAlivePlayers >= 1
+    
+    def disqualifyAllPlayers(self) -> None:
+        for player in self.players:
+            player.die()
+        self.countAlivePlayers = 0
+
+    def areAllAlive(self) -> bool:
+        return self.countAlivePlayers == len(self.players)
+    
+    def resetPlayerWithNickname(self, nickname : str) -> int:
+        position = self.findPlayerPosition(nickname)
+        self.players[position].reset()
+        self.countAlivePlayers += 1
+        return self.countAlivePlayers
+    
+    def resetAllPlayers(self) -> None:
+        for player in self.players:
+            player.reset()
+        self.countAlivePlayers = len(self.players)
+
+    def requirePlayerWithNicknameToWait(self, nickname : str) -> None:
+        position = self.findPlayerPosition(nickname)
+        self.players[position].wait()
+
+    def areAllWaiting(self) -> bool:
+        return sum([player.isWaiting() for player in self.players]) == len(self.players)

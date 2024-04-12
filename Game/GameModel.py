@@ -1,9 +1,9 @@
-import sys
 import random
 import json
+import time
+import sys
 import os
 
-import sys
 sys.path.append("./Quizzes/")
 sys.path.append("./Message/")
 sys.path.append("./Participants/")
@@ -26,8 +26,10 @@ class GameModel:
         self.timeout = 20
         self.status = GameStatus.OFF
         self.guessedCharacters = []
-
+        self.startTime = time.time()
         self.rules = self.getStoredGameInformation()
+        self.secondCount = None
+        self.turnCount = 0
 
     def haveEnoughPlayers(self) -> bool:
         return len(self.players) >= self.rules["required_number_of_players"]
@@ -57,21 +59,74 @@ class GameModel:
         
     def addPlayer(self, player: ParticipantModel) -> None:
         self.players.addPlayer(player)
+        self.sendBroadcastedSummary()
+
+    def reallowPlayerWithNickname(self, nickname: str) -> bool:
+
+        if self.players.getPlayerWithNickname(nickname).isWaiting():
+            return False
+
+        self.players.requirePlayerWithNicknameToWait(nickname)
+        self.sendBroadcastedSummary()
+
+        return True
 
     def addWatcher(self, watcher: ParticipantModel) -> None:
         self.watchers.append(watcher)
+        self.sendBroadcastedSummary()
+        
+    def removeUnregisteredPlayer(self, player: ParticipantModel) -> None:
+        self.players.removeUnregisteredPlayer(player)
+    
+    def removeRegisteredPlayer(self, player: ParticipantModel) -> None:
+        self.players.removeRegisteredPlayer(player.getNickname())
+        
+    def removeWatcher(self, watcher: ParticipantModel) -> None:
+        self.watchers.remove(watcher)
 
     def ready(self) -> None:
-        self.roundCount = 0
+        self.roundCount = self.turnCount = 0
         self.status = GameStatus.READY
         self.quizList.chooseRandomQuiz()
 
-    def startNewGame(self) -> bool:
+    def getClientCountSummary(self) -> dict:
+        return {
+            "required_number_of_players": self.rules["required_number_of_players"],
+            "player_count": len(self.players),
+            "successfully_registered_player_count": self.players.countSuccessfullyRegisteredPlayers(),
+            "watcher_count": len(self.watchers)
+        }
+    
+    def broadcastCloseConnection(self) -> None:
+        self.broadcastResponse(Response(
+            statusCode = ResponseStatusCode.SERVER_CLOSE_CONNECTION,
+            content = "Server is shutting down!!!"
+        ))
 
-        if self.players.countSuccessfullyRegisteredPlayers() < self.rules["required_number_of_players"]:
+    def countPlayers(self) -> int:
+        return len(self.players)
+    
+    def startNewMatch(self) -> bool:
+
+        if (self.players.countSuccessfullyRegisteredPlayers() < self.rules["required_number_of_players"]) or (not self.players.areAllWaiting()):
             return False
+        
+        self.players.resetAllPlayers()
 
         self.status = GameStatus.RUNNING
+
+        self.requireCurrentPlayerAnswer()
+
+        self.startTime = time.time()
+
+        self.sendBroadcastedSummary()
+
+        self.broadcastSummary()
+
+        self.broadcastResponse(Response(
+            statusCode = ResponseStatusCode.GAME_STARTED,
+            content = "Game started!!!"
+        ))
     
         return True
 
@@ -100,9 +155,12 @@ class GameModel:
     def getJSONSummary(self) -> dict:
         result = {
             "round_count": self.roundCount,
+            "turn_count": self.turnCount,
             "player": self.players.getJSONSummary(),
             "quiz": self.quizList.getJSONSummary(),
-            "guessed_characters": self.guessedCharacters
+            "guessed_characters": self.guessedCharacters,
+            "client_count_summary": self.getClientCountSummary(),
+            "start_time": self.startTime
         }
 
         return result
@@ -134,12 +192,22 @@ class GameModel:
         ))
     
     def end(self) -> None:
-        self.broadcastFinalResult()
+        self.broadcastRanks()
         self.status = GameStatus.ENDED
         self.broadcastResponse(Response(
             statusCode = ResponseStatusCode.GAME_ENDED,
             content = "Game ended!!!"
         ))
+    
+    def prepareForRestart(self) -> None:
+        self.roundCount = self.turnCount = 0
+        self.guessedCharacters.clear()
+        self.players.disqualifyAllPlayers()
+        self.broadcastResponse(Response(
+            statusCode = ResponseStatusCode.RESTART_ALLOWED,
+            content = "Game is ready for restart!!!"
+        ))
+        self.ready()
 
     def stop(self) -> None:
         self.status = GameStatus.OFF
@@ -156,6 +224,21 @@ class GameModel:
                 return False
         return self.status.isRunning()
         
+    def handleTimer(self) -> bool:
+        self.secondCount = self.timeout - int(time.time() - self.startTime)
+
+        if self.secondCount < 0:
+            if not self.moveTurnToNextPlayer():
+                self.end()
+                return True
+            
+            self.requireCurrentPlayerAnswer()
+            self.startTime = time.time()
+            self.secondCount = self.timeout - int(time.time() - self.startTime)
+            self.sendBroadcastedSummary()
+
+        return False
+
     def handleAnswerSubmission(self, answer: dict) -> bool:
         if not self.status.isRunning():
             return True
@@ -163,28 +246,37 @@ class GameModel:
         guessedCharacter = answer["guessed_character"]
         guessedKeyword = answer["guessed_keyword"]
 
-        if guessedCharacter not in self.guessedCharacters:
-            self.guessedCharacters.append(guessedCharacter)
+        self.turnCount += 1
 
+        if (guessedCharacter is None) == (guessedKeyword is None):
+            return False
+        
         currentPlayer = self.players.getCurrentPlayer()
         quiz = self.quizList.getCurrentQuiz()
 
-        flag = False
+        turnLost = False
 
-        if quiz.receiveLetterGuess(guessedCharacter):
-            currentPlayer.score += self.rules["number_of_points_granted_for_correct_guess"]
-            self.broadcastResponse(Response(
-                statusCode = ResponseStatusCode.BROADCASTED_MESSAGE,
-                content = f"Character '{guessedCharacter}' has {quiz.countOccernerces(guessedCharacter)} occurences in the keyword!!!"
-            ))
-        else:
-            self.broadcastResponse(Response(
-                statusCode = ResponseStatusCode.BROADCASTED_MESSAGE,
-                content = f"Character '{guessedCharacter}' is not in the keyword!!!"
-            ))
-            flag = True
+        if guessedCharacter is not None:
+            if guessedCharacter in self.guessedCharacters:
+                return False
+                
+            self.guessedCharacters.append(guessedCharacter)
 
-        if guessedKeyword is not None:
+            if quiz.receiveLetterGuess(guessedCharacter):
+                currentPlayer.score += self.rules["number_of_points_granted_for_correct_guess"]
+                self.broadcastResponse(Response(
+                    statusCode = ResponseStatusCode.BROADCASTED_MESSAGE,
+                    content = f"Character '{guessedCharacter}' has {quiz.countOccernerces(guessedCharacter)} occurences in the keyword!!!"
+                ))
+            else:
+                self.broadcastResponse(Response(
+                    statusCode = ResponseStatusCode.BROADCASTED_MESSAGE,
+                    content = f"Character '{guessedCharacter}' is not in the keyword!!!"
+                ))
+
+                turnLost = True
+
+        elif guessedKeyword is not None:
             if quiz.receiveKeywordGuess(guessedKeyword):
                 currentPlayer.score += self.rules["number_of_points_granted_for_correct_keyword"]
                 self.broadcastResponse(Response(
@@ -200,22 +292,24 @@ class GameModel:
 
                 if not self.players.disqualifyCurrentPlayer():
                     self.end()
+                    
                     return True
-
-                flag = True
+                
+                turnLost = True
 
         if quiz.isSolved():
             self.end()
             return True
             
-        if flag:
+        if turnLost:
             if not self.moveTurnToNextPlayer():
                 return True
         
+        self.requireCurrentPlayerAnswer()
+        self.startTime = time.time()
+
         self.broadcastSummary()
         self.sendBroadcastedSummary()
-
-        self.requireCurrentPlayerAnswer()
 
         return False
     
@@ -227,6 +321,19 @@ class GameModel:
         self.broadcastResponse(Response(
             statusCode = ResponseStatusCode.BROADCASTED_MESSAGE,
             content = self.players.getRankSummary()
+        ))
+
+    def getJSONRankSummary(self) -> dict:
+        return {
+            "rank_summary": self.players.getJSONRankSummary(),
+            "quiz_summary": self.quizList.getJSONSummary()
+        }
+
+    def broadcastRanks(self) -> None:
+
+        self.broadcastResponse(Response(
+            statusCode = ResponseStatusCode.BROADCASTED_RANK,
+            content = json.dumps(self.getJSONRankSummary())
         ))
 
     def containsUnsentResponse(self) -> bool:
