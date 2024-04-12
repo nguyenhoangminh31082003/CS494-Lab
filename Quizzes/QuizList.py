@@ -17,6 +17,7 @@ class QuizList:
         result = {
             "keyword_length": self.currentQuiz.getKeywordLength(),
             "current_keyword": self.currentQuiz.getCurrentKeyword(),
+            "keyword": self.currentQuiz.getKeyword(),
             "hint": self.currentQuiz.getQuestion()
         }
 
