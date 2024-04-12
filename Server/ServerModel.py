@@ -175,6 +175,19 @@ class ServerModel:
         self.game.startNewMatch()
 
         return True
+    
+    def handleRestartRequest(self, participant : ParticipantModel) -> bool:
+        
+        nickname = participant.getNickname()
+
+        self.game.reallowPlayerWithNickname(nickname)
+
+        participant.addResponse(Response(
+            statusCode=ResponseStatusCode.WAIT_GAME_START_REQUIRE,
+            content= f"Registration Completed Successfully. You will have {self.game.findPlayerPosition(nickname)}-th turn in the game"
+        ))
+
+        return self.game.startNewMatch()
 
     def serveConnection(self, key, mask):
         participantSocket = key.fileobj
@@ -207,7 +220,7 @@ class ServerModel:
                     self.game.handleAnswerSubmission(json.loads(content))
 
                 elif statusCode == RequestStatusCode.RESTART_NEW_MATCH:
-                    self.game.startNewMatch()
+                    self.handleRestartRequest(participant)
 
         if (mask & selectors.EVENT_WRITE):
             participant.sendResponse(participantSocket)

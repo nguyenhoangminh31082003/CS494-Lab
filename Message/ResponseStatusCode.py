@@ -15,6 +15,7 @@ class ResponseStatusCode(enum.IntEnum):
     BROADCASTED_PLAYER_ANSWER = 13
     BROADCASTED_RANK = 14
     RESTART_ALLOWED = 15
+    WAIT_GAME_START_REQUIRED = 16
 
     def isNicknameRelated(self) -> bool:
         return self in [

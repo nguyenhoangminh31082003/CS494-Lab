@@ -166,134 +166,134 @@ class GameGUI:
         self.font = pygame.font.Font(AssetConstants.AMATICSC_FONT, 20)
 
         self.openScreenComponents['label'] = TextBox(
-            AssetConstants.AMATICSC_FONT,
-            ColorCodeTuples.WHITE,
-            32,
-            MessageTextConstants.ENTER_NICKNAME,
-            (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
+            textFont = AssetConstants.AMATICSC_FONT,
+            textColor = ColorCodeTuples.WHITE,
+            textSize = 32,
+            textContent = MessageTextConstants.ENTER_NICKNAME,
+            containerInfo = (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
         )
         
         self.waitScreenComponents['hello'] = TextBox(
-            AssetConstants.AMATICSC_FONT,
-            ColorCodeTuples.WHITE,
-            32,
-            "Hello, ",
-            (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 - self.screenHeight * 20 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
+            textFont = AssetConstants.AMATICSC_FONT,
+            textColor = ColorCodeTuples.WHITE,
+            textSize = 32,
+            textContent = "Hello, ",
+            containerInfo = (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 - self.screenHeight * 20 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
         )
         
         self.waitScreenComponents['label'] = TextBox(
-            AssetConstants.AMATICSC_FONT,
-            ColorCodeTuples.WHITE,
-            32,
-            MessageTextConstants.PAUSE_TEXT,
-            (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
+            textFont = AssetConstants.AMATICSC_FONT,
+            textColor = ColorCodeTuples.WHITE,
+            textSize = 32,
+            textContent = MessageTextConstants.PAUSE_TEXT,
+            containerInfo = (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
         )
         
         self.statisticScreenComponents['label'] = TextBox(
-            AssetConstants.AMATICSC_FONT,
-            ColorCodeTuples.WHITE,
-            32,
-            MessageTextConstants.END_TEXT,
-            (containerBoxContainer[0], self.screenHeight / 10, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
+            textFont = AssetConstants.AMATICSC_FONT,
+            textColor = ColorCodeTuples.WHITE,
+            textSize = 32,
+            textContent = MessageTextConstants.END_TEXT,
+            containerInfo = (containerBoxContainer[0], self.screenHeight / 10, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
         )
         
         self.statisticScreenComponents['keyword'] = TextBox(
-            AssetConstants.AMATICSC_FONT,
-            ColorCodeTuples.WHITE,
-            20,
-            "ANSWER",
-            (containerBoxContainer[0], self.screenHeight * 2 / 10, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
+            textFont = AssetConstants.AMATICSC_FONT,
+            textColor = ColorCodeTuples.WHITE,
+            textSize = 20,
+            textContent = "ANSWER",
+            containerInfo = (containerBoxContainer[0], self.screenHeight * 2 / 10, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
         )
         
         self.openScreenComponents['notify'] = TextBox(
-            AssetConstants.AMATICSC_FONT,
-            ColorCodeTuples.WHITE,
-            20,
-            "",
-            (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 + self.screenHeight * 6 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
+            textFont = AssetConstants.AMATICSC_FONT,
+            textColor = ColorCodeTuples.WHITE,
+            textSize = 20,
+            textContent = str(),
+            containerInfo = (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 + self.screenHeight * 6 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
         )
         
         self.waitScreenComponents['notify'] = TextBox(
-            AssetConstants.AMATICSC_FONT,
-            ColorCodeTuples.GREEN,
-            16,
-            "1/5",
-            (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 + self.screenHeight * 10 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
+            textFont = AssetConstants.AMATICSC_FONT,
+            textColor = ColorCodeTuples.GREEN,
+            textSize = 16,
+            textContent = "1/5",
+            containerInfo = (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 + self.screenHeight * 10 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
         )
         
         # Nickname TextForm
         self.openScreenComponents['nickname'] = TextForm(
-            AssetConstants.AMATICSC_FONT,
-            ColorCodeTuples.BLACK,
-            20,
-            (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 + self.screenHeight * 13 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
+            textFont = AssetConstants.AMATICSC_FONT,
+            textColor = ColorCodeTuples.BLACK,
+            textSize = 20,
+            containerInfo = (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 + self.screenHeight * 13 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
         )
         
         for i in range(26):
-            text = f"{chr(65+i)}"
+            text = f"{chr(65 + i)}"
             x = containerBoxContainer[0] - self.screenWidth * 1 / 10 + ( i % 9 ) * 36
             y = containerBoxContainer[1] + self.screenHeight * 28 / 100 + (i // 9) * 36
             self.buttons.append(TextButton(text, x, y))
         
         self.gameScreenComponents['round'] = TextBox(
-            AssetConstants.AMATICSC_FONT,
-            ColorCodeTuples.WHITE,
-            30,
-            "abcxyzk - Round: 1",
-            (containerBoxContainer[0], self.screenHeight / 10, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100),
-            True
+            textFont = AssetConstants.AMATICSC_FONT,
+            textColor = ColorCodeTuples.WHITE,
+            textSize = 30,
+            textContent = "abcxyzk - Round: 1",
+            containerInfo = (containerBoxContainer[0], self.screenHeight / 10, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100),
+            border = True
         )
         
         self.gameScreenComponents['hint'] = TextBox(
-            AssetConstants.AMATICSC_FONT,
-            ColorCodeTuples.WHITE,
-            16,
-            "hint",
-            (containerBoxContainer[0], self.screenHeight * 2 / 10, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100),
+            textFont = AssetConstants.AMATICSC_FONT,
+            textColor = ColorCodeTuples.WHITE,
+            textSize = 16,
+            textContent = "hint",
+            containerInfo = (containerBoxContainer[0], self.screenHeight * 2 / 10, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100),
         )
         
         self.gameScreenComponents['player'] = TextBox(
-            AssetConstants.AMATICSC_FONT,
-            ColorCodeTuples.WHITE,
-            20,
-            "Players:",
-            (self.screenWidth / 10, self.screenHeight / 10, 0, 0),
-            True
+            textFont = AssetConstants.AMATICSC_FONT,
+            textColor = ColorCodeTuples.WHITE,
+            textSize = 20,
+            textContent = "Players:",
+            containerInfo = (self.screenWidth / 10, self.screenHeight / 10, 0, 0),
+            border = True
         )
         
         self.gameScreenComponents['Time'] = TextBox(
-            AssetConstants.AMATICSC_FONT,
-            ColorCodeTuples.WHITE,
-            20,
-            "Time",
-            (self.screenWidth * 9 / 10, self.screenHeight / 10, 0, 0),
-            True
+            textFont = AssetConstants.AMATICSC_FONT,
+            textColor = ColorCodeTuples.WHITE,
+            textSize = 20,
+            textContent = "Time",
+            containerInfo = (self.screenWidth * 9 / 10, self.screenHeight / 10, 0, 0),
+            border = True
         )
         
         self.gameScreenComponents['Watch'] = TextBox(
-            AssetConstants.AMATICSC_FONT,
-            ColorCodeTuples.WHITE,
-            20,
-            "Watcher:",
-            (self.screenWidth * 9 / 10, self.screenHeight / 10 + 90, 0, 0),
-            True
+            textFont = AssetConstants.AMATICSC_FONT,
+            textColor = ColorCodeTuples.WHITE,
+            textSize = 20,
+            textContent = "Watcher:",
+            containerInfo = (self.screenWidth * 9 / 10, self.screenHeight / 10 + 90, 0, 0),
+            border = True
         )
         
         self.gameScreenComponents['Watcher'] = TextBox(
-            AssetConstants.AMATICSC_FONT,
-            ColorCodeTuples.WHITE,
-            20,
-            str(0),
-            (self.screenWidth * 9 / 10, self.screenHeight / 10 + 120, 0, 0),
+            textFont = AssetConstants.AMATICSC_FONT,
+            textColor = ColorCodeTuples.WHITE,
+            textSize = 20,
+            textContent = str(0),
+            containerInfo = (self.screenWidth * 9 / 10, self.screenHeight / 10 + 120, 0, 0),
         )
         
         
         self.gameScreenComponents['Timer'] = TextBox(
-            AssetConstants.AMATICSC_FONT,
-            ColorCodeTuples.WHITE,
-            20,
-            str(self.timeLeft),
-            (self.screenWidth * 9 / 10, self.screenHeight / 10 + 30, 0, 0),
+            textFont = AssetConstants.AMATICSC_FONT,
+            textColor = ColorCodeTuples.WHITE,
+            textSize = 20,
+            textContent = str(self.timeLeft),
+            containerInfo = (self.screenWidth * 9 / 10, self.screenHeight / 10 + 30, 0, 0),
         )
 
         self.openScreenComponents['playButton'] = Button(
@@ -303,20 +303,20 @@ class GameGUI:
         )
         
         self.keyword_button = TextBox(
-            AssetConstants.AMATICSC_FONT,
-            ColorCodeTuples.WHITE,
-            20,
-            "KEYWORD",
-            (containerBoxContainer[0] - self.screenWidth * 1 / 10 + ( 26 % 9 ) * 36 + 60, containerBoxContainer[1] + self.screenHeight * 28 / 100 + (26 // 9) * 36 + 14, 0, 0),
-            True
+            textFont = AssetConstants.AMATICSC_FONT,
+            textColor = ColorCodeTuples.WHITE,
+            textSize = 20,
+            textContent = "KEYWORD",
+            containerInfo = (containerBoxContainer[0] - self.screenWidth * 1 / 10 + ( 26 % 9 ) * 36 + 60, containerBoxContainer[1] + self.screenHeight * 28 / 100 + (26 // 9) * 36 + 14, 0, 0),
+            border = True
         )
         
         self.keyword_textform = TextForm(
-            AssetConstants.AMATICSC_FONT,
-            ColorCodeTuples.BLACK,
-            20,
-            (containerBoxContainer[0], containerBoxContainer[1] + self.screenHeight * 50 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100),
-            maxChar=30
+            textFont = AssetConstants.AMATICSC_FONT,
+            textColor = ColorCodeTuples.BLACK,
+            textSize = 20,
+            containerInfo = (containerBoxContainer[0], containerBoxContainer[1] + self.screenHeight * 50 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100),
+            maxChar = 30
         )
             
 
@@ -632,7 +632,10 @@ class GameGUI:
                 if button.text in self.summary["guessed_characters"]:
                     button.updateColor()
 
-        elif statusCode == ResponseStatusCode.NICKNAME_ACCEPTED:
+        elif statusCode in [
+            ResponseStatusCode.NICKNAME_ACCEPTED,
+            ResponseStatusCode.WAIT_GAME_START_REQUIRED
+        ]:
             self.screenViewID = ScreenViewID.WAIT
             self.waitScreenComponents['hello'].changeTextContent(f"Hello, {self.nickname}!")
     
