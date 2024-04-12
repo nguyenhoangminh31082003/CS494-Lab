@@ -54,6 +54,7 @@ class GameGUI:
         self.timeLeft = 20
         self.nickname = None
         self.rankSummary = None
+        self.restartAllowance = False
         
     def bindStatisticUI(self) -> bool:
         
@@ -642,7 +643,9 @@ class GameGUI:
     
         elif statusCode == ResponseStatusCode.GAME_STARTED:
             self.screenViewID = ScreenViewID.GAME
-        
+            self.restartAllowance = False
+        elif statusCode == ResponseStatusCode.RESTART_ALLOWED:
+            self.restartAllowance = True
 
         return True
 
