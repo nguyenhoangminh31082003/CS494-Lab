@@ -18,7 +18,7 @@ class CurrentQuiz(Quiz):
 
     def receiveLetterGuess(self, letter : str) -> bool:
 
-        letter = letter.strip().lower()
+        letter = letter.strip().upper()
 
         if len(letter) != 1:
             return False
@@ -34,7 +34,7 @@ class CurrentQuiz(Quiz):
     
     def receiveKeywordGuess(self, keyword : str) -> bool:
         
-        if keyword.strip().lower() == self.keyword:
+        if keyword.strip().upper() == self.keyword:
             self.currentKeyword = self.keyword
             return True
         

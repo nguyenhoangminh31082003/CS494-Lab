@@ -184,7 +184,7 @@ class ServerModel:
             return False
 
         participant.addResponse(Response(
-            statusCode=ResponseStatusCode.WAIT_GAME_START_REQUIRE,
+            statusCode=ResponseStatusCode.WAIT_GAME_START_REQUIRED,
             content= f"Registration Completed Successfully. You will have {self.game.findPlayerPosition(nickname)}-th turn in the game"
         ))
 

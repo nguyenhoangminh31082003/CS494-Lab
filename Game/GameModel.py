@@ -63,10 +63,10 @@ class GameModel:
 
     def reallowPlayerWithNickname(self, nickname: str) -> bool:
 
-        if self.players.getPlayer(nickname).isAlive():
+        if self.players.getPlayerWithNickname(nickname).isAlive():
             return False
 
-        self.players.reallowPlayerWithNickname(nickname)
+        self.players.resetPlayerWithNickname(nickname)
         self.sendBroadcastedSummary()
 
         return True
@@ -191,7 +191,7 @@ class GameModel:
             content = "Game ended!!!"
         ))
     
-    def prepareToRestart(self) -> None:
+    def prepareForRestart(self) -> None:
         self.roundCount = self.turnCount = 0
         self.guessedCharacters.clear()
         self.players.disqualifyAllPlayers()

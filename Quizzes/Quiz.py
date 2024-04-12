@@ -5,7 +5,7 @@ class Quiz:
     
     def __init__(self, question : str, keyword : str):
         self.question = question.strip()
-        self.keyword = keyword.strip().lower()
+        self.keyword = keyword.strip().upper()
 
     def countOccernerces(self, character : str) -> int:
     
