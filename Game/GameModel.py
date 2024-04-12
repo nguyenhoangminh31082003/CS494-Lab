@@ -82,7 +82,9 @@ class GameModel:
         self.players.removeRegisteredPlayer(player.getNickname())
         
     def removeWatcher(self, watcher: ParticipantModel) -> None:
+        #print("WHERE ARE YOU BUG!!!", len(self.watchers))
         self.watchers.remove(watcher)
+        #print("WHERE ARE YOU BUG!!!", len(self.watchers))
 
     def ready(self) -> None:
         self.roundCount = self.turnCount = 0

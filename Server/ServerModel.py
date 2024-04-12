@@ -112,17 +112,16 @@ class ServerModel:
     def handleCloseConnectionRequest(self, participant : ParticipantModel, participantSocket : socket.socket) -> None:
         participantSocket.close()
         self.selector.unregister(participantSocket)
-        content = ""
+        content = str()
         
-        if participant.getNickname() is None:
+        #print("WHERE ARE YOU? BUGS!!!!!!!!!!!!!", participant.getMode())
+
+        if participant.isWatcher():
+            self.game.removeWatcher(participant)
+            content = f"Watcher with address {participant.address} has left the game"
+        elif participant.getNickname() is None:
             self.game.removeUnregisteredPlayer(participant)
             content = f"Client with address {participant.address} has left the game"
-            
-        elif participant.isWatcher():
-            self.game.removeWatcher(participant)
-            self.game.removeUnregisteredPlayer(participant)
-            content = f"Watcher with address {participant.address} has left the game"
-        
         elif participant.isWaiting():
             content = f"Waiting with address {participant.address} has left the game"
             self.game.removeUnregisteredPlayer(participant)

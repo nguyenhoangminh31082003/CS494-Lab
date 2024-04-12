@@ -21,6 +21,9 @@ class ParticipantModel:
     def __str__(self):
         return f"ParticipantModel({self.nickname}, {self.address})"
 
+    def getMode(self) -> PlayerMode:
+        return self.mode
+
     @staticmethod
     def checkNicknameValid(nickname: str) -> bool:
         length = len(nickname)
