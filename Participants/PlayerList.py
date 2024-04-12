@@ -175,3 +175,17 @@ class PlayerList:
         self.countAlivePlayers -= 1
         
         return self.countAlivePlayers >= 1
+    
+    def disqualifyAllPlayers(self) -> None:
+        for player in self.players:
+            player.die()
+        self.countAlivePlayers = 0
+
+    def areAllAlive(self) -> bool:
+        return self.countAlivePlayers == len(self.players)
+    
+    def resetPlayerWithNickname(self, nickname : str) -> int:
+        position = self.findPlayerPosition(nickname)
+        self.players[position].reset()
+        self.countAlivePlayers += 1
+        return self.countAlivePlayers

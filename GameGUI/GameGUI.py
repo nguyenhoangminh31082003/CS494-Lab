@@ -52,17 +52,17 @@ class GameGUI:
         self.summary = None
 
         self.timeLeft = 20
-        self.ranks = None
         self.nickname = None
+        self.rankSummary = None
         
     def bindStatisticUI(self) -> bool:
         
-        if self.rank_summary is None:
+        if self.rankSummary is None:
             return False
         
         self.statistic.clear()
         
-        rankInformation = self.rank_summary['rank_summary']["ranks"]
+        rankInformation = self.rankSummary['rank_summary']["ranks"]
         
         for i, rank in enumerate(rankInformation):
             self.statistic.append(
@@ -100,7 +100,7 @@ class GameGUI:
                 )
             )
         
-        if self.nickname in self.rank_summary['winner_nicknames']:
+        if self.nickname in self.rankSummary['rank_summary']['winner_nicknames']:
             self.statisticScreenComponents['label'].changeTextContent(MessageTextConstants.WIN_TEXT)
         
         
@@ -366,7 +366,7 @@ class GameGUI:
         self.summary = None
 
         self.timeLeft = 20
-        self.rank_summary = None
+        self.rankSummary = None
         
         pygame.init()
         
@@ -620,9 +620,8 @@ class GameGUI:
 
             print(f"[CLIENT] Received summary: {json.dumps(self.summary, indent = 4)}")
             
-        if statusCode == ResponseStatusCode.BROADCASTED_RANK:
-            self.rank_summary = json.loads(content)
-            
+        elif statusCode == ResponseStatusCode.BROADCASTED_RANK:
+            self.rankSummary = json.loads(content)
             self.bindStatisticUI()
             self.screenViewID = ScreenViewID.STATISTIC
             
@@ -631,10 +630,6 @@ class GameGUI:
             for button in self.buttons:
                 if button.text in self.summary["guessed_characters"]:
                     button.updateColor()
-
-        elif statusCode == ResponseStatusCode.BROADCASTED_RANK:
-            self.ranks = json.loads(content)
-            print(json.dumps(self.ranks, indent = 4))
 
         elif statusCode == ResponseStatusCode.NICKNAME_ACCEPTED:
             self.screenViewID = ScreenViewID.WAIT

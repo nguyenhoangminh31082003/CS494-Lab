@@ -92,7 +92,7 @@ class GameModel:
     
     def startNewMatch(self) -> bool:
 
-        if self.players.countSuccessfullyRegisteredPlayers() < self.rules["required_number_of_players"]:
+        if (self.players.countSuccessfullyRegisteredPlayers() < self.rules["required_number_of_players"]) or (not self.players.areAllAlive()):
             return False
 
         self.status = GameStatus.RUNNING
@@ -180,6 +180,12 @@ class GameModel:
             statusCode = ResponseStatusCode.GAME_ENDED,
             content = "Game ended!!!"
         ))
+    
+    def prepareToRestart(self) -> None:
+        self.roundCount = self.turnCount = 0
+        self.guessedCharacters.clear()
+        self.players.disqualifyAllPlayers()
+        self.ready()
 
     def stop(self) -> None:
         self.status = GameStatus.OFF

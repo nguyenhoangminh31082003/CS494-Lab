@@ -63,8 +63,6 @@ class ServerModel:
         self.listeningSocket.close()
         self.selector.unregister(self.listeningSocket)
 
-
-
         self.selector.close()
 
     def handleConnectionRequest(self, key, mask):
@@ -130,10 +128,12 @@ class ServerModel:
             self.game.removeRegisteredPlayer(participant)
 
         print(f"[SERVER] {content}")
+        
         self.game.broadcastResponse(Response(
             statusCode=ResponseStatusCode.BROADCASTED_MESSAGE,
             content=content
         ))
+
         if self.game.countPlayers() > 0:
             self.game.sendBroadcastedSummary()
             
@@ -196,7 +196,7 @@ class ServerModel:
                 if statusCode == RequestStatusCode.CLOSE_CONNECTION:
                     self.handleCloseConnectionRequest(participant, participantSocket)
 
-                if statusCode == RequestStatusCode.NICKNAME_REQUEST:
+                elif statusCode == RequestStatusCode.NICKNAME_REQUEST:
                     
                     self.handleNicknameRequest(
                         participant = participant, 
@@ -205,6 +205,9 @@ class ServerModel:
 
                 elif statusCode == RequestStatusCode.ANSWER_SUBMISSION:
                     self.game.handleAnswerSubmission(json.loads(content))
+
+                elif statusCode == RequestStatusCode.RESTART_NEW_MATCH:
+                    self.game.startNewMatch()
 
         if (mask & selectors.EVENT_WRITE):
             participant.sendResponse(participantSocket)
@@ -222,7 +225,16 @@ class ServerModel:
                     self.serveConnection(key, mask)
 
             if self.game.getStatus().isEnded() and (not self.game.containsUnsentResponse()):
-                self.game.stop()
+                while True:
+                    administratorAnswer = input("Do you want to restart the game? (yes/no): ").lower()
+                    if administratorAnswer == "yes":
+                        self.game.prepareForRestart()
+                        break
+                    elif administratorAnswer == "no":
+                        self.game.stop()
+                        break
+                    else:
+                        print("Invalid answer. Please try again.")
 
             if self.game.getStatus().isRunning():
                 self.game.handleTimer()
@@ -243,13 +255,13 @@ class ServerModel:
 
         self.isRunning = True
 
+        N = self.readPlayerCountRequirement()
+
+        self.createListeningSocketAndSelector()
+
+        self.game.setPlayerCountRequirement(N)
+
         while True:
-
-            N = self.readPlayerCountRequirement()
-
-            self.createListeningSocketAndSelector()
-
-            self.game.setPlayerCountRequirement(N)
 
             self.game.ready()
 
@@ -262,10 +274,5 @@ class ServerModel:
             listeningThread.join()
 
             self.closeConnections()
-
-            N = input("Do you want to start the another game? Please type 'Yes' in any case if you want to start the another game: ").lower()
-            if N != "yes":
-                print("See you later")
-                break
 
         self.isRunning = False
