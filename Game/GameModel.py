@@ -195,6 +195,10 @@ class GameModel:
         self.roundCount = self.turnCount = 0
         self.guessedCharacters.clear()
         self.players.disqualifyAllPlayers()
+        self.broadcastResponse(Response(
+            statusCode = ResponseStatusCode.RESTART_ALLOWED,
+            content = "Game is ready for restart!!!"
+        ))
         self.ready()
 
     def stop(self) -> None:

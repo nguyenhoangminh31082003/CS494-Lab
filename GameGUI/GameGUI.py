@@ -154,6 +154,22 @@ class GameGUI:
         self.gameScreenComponents['Timer'].changeTextContent(str(self.timeLeft))
         
         return True
+    
+    def initializeKeyboard(self):
+        containerBoxContainer = (
+            self.screenWidth * 350 / 1000, 
+            self.screenHeight * 170 / 563, 
+            self.screenWidth * 332 / 1000, 
+            self.screenHeight * 332 / 563
+        )
+
+        self.buttons.clear()
+
+        for i in range(26):
+            text = f"{chr(65 + i)}"
+            x = containerBoxContainer[0] - self.screenWidth * 1 / 10 + ( i % 9 ) * 36
+            y = containerBoxContainer[1] + self.screenHeight * 28 / 100 + (i // 9) * 36
+            self.buttons.append(TextButton(text, x, y))
 
     def initializeScreenComponents(self):
         containerBoxContainer = (
@@ -237,12 +253,6 @@ class GameGUI:
             textSize = 20,
             containerInfo = (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 + self.screenHeight * 13 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
         )
-        
-        for i in range(26):
-            text = f"{chr(65 + i)}"
-            x = containerBoxContainer[0] - self.screenWidth * 1 / 10 + ( i % 9 ) * 36
-            y = containerBoxContainer[1] + self.screenHeight * 28 / 100 + (i // 9) * 36
-            self.buttons.append(TextButton(text, x, y))
         
         self.gameScreenComponents['round'] = TextBox(
             textFont = AssetConstants.AMATICSC_FONT,
@@ -407,6 +417,8 @@ class GameGUI:
         self.initializeImages()
 
         self.initializeScreenComponents()
+
+        self.initializeKeyboard()
 
         self.bindSummaryUI()
 
@@ -650,23 +662,23 @@ class GameGUI:
                 if button.text in self.summary["guessed_characters"]:
                     button.updateColor()
 
-        elif statusCode in [
-            ResponseStatusCode.NICKNAME_ACCEPTED,
-            ResponseStatusCode.WAIT_GAME_START_REQUIRED
-        ]:
+        elif statusCode == ResponseStatusCode.NICKNAME_ACCEPTED:
             self.screenViewID = ScreenViewID.WAIT
             self.waitScreenComponents['hello'].changeTextContent(f"Hello, {self.nickname}!")
-    
+        elif statusCode == ResponseStatusCode.WAIT_GAME_START_REQUIRED:
+            self.restartAllowance = False
+            self.screenViewID = ScreenViewID.WAIT
+            self.waitScreenComponents['hello'].changeTextContent(f"Hello, {self.nickname}!")
+            self.initializeScreenComponents()
         elif statusCode == ResponseStatusCode.GAME_FULL:
             self.nickname = "Watcher"   
             self.screenViewID = ScreenViewID.WAIT
             self.waitScreenComponents['hello'].changeTextContent(f"Hello, {self.nickname}!")
-    
         elif statusCode == ResponseStatusCode.GAME_STARTED:
             self.screenViewID = ScreenViewID.GAME
-            self.restartAllowance = False
         elif statusCode == ResponseStatusCode.RESTART_ALLOWED:
             self.restartAllowance = True
+            self.initializeKeyboard()
 
         return True
 

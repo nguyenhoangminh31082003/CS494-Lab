@@ -153,7 +153,7 @@ class PlayerList:
         return "\n".join(resultLines)
     
     def countSuccessfullyRegisteredPlayers(self) -> int:
-        return len([player for player in self.players if player.getNickname() and player.isAlive() is not None])
+        return len([player for player in self.players if (player.getNickname() is not None) and player.isAlive()])
     
     def moveTurnToNextPlayer(self) -> bool:
         playerCount = len(self.players)
