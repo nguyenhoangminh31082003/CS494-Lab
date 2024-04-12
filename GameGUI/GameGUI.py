@@ -105,7 +105,7 @@ class GameGUI:
         
         if self.nickname in self.rankSummary['rank_summary']['winner_nicknames']:
             self.statisticScreenComponents['label'].changeTextContent(MessageTextConstants.WIN_TEXT)
-         
+
     def bindSummaryUI(self) -> bool:
 
         if self.summary is None:
@@ -163,6 +163,10 @@ class GameGUI:
         self.timeLeft = 20 - int(time.time() - self.summary["start_time"])
         self.gameScreenComponents['Timer'].changeTextContent(str(self.timeLeft))
         
+        for button in self.buttons:
+            if button.text in self.summary["guessed_characters"]:
+                button.updateColor()
+
         return True
     
     def initializeKeyboard(self):
@@ -674,7 +678,6 @@ class GameGUI:
             for button in self.buttons:
                 if button.text in self.summary["guessed_characters"]:
                     button.updateColor()
-
         elif statusCode == ResponseStatusCode.NICKNAME_ACCEPTED:
             self.screenViewID = ScreenViewID.WAIT
             self.waitScreenComponents['hello'].changeTextContent(f"Hello, {self.nickname}!")

@@ -4,6 +4,7 @@ import AssetConstants
 import ColorCodeTuples
 
 class TextButton(pygame.sprite.Sprite):
+	
 	def __init__(self, text, x, y, textSize = 20):
 		self.textFont = pygame.font.Font(AssetConstants.AMATICSC_FONT, textSize)
 		self.text = text
