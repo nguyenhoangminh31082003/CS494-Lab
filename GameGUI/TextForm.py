@@ -28,7 +28,7 @@ class TextForm(TextBox):
         # check if unicode is backspace
         if unicode == "\x08":
             self.changeTextContent(self.textContent[:-1])
-        elif len(self.textContent) >= self.maxChar or ( not unicode.isalnum() and not unicode in [" ", ".", ",", "!", "?"]):
+        elif len(self.textContent) >= self.maxChar or ( not unicode.isalnum() and unicode != "_"):
             return
         else:
             self.changeTextContent(self.textContent + unicode)
