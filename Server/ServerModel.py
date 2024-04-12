@@ -242,7 +242,7 @@ class ServerModel:
                 while True:
                     administratorAnswer = input("Do you want to restart the game? (yes/no): ").lower()
                     if administratorAnswer == "yes":
-                        self.game.prepareToRestart()
+                        self.game.prepareForRestart()
                         break
                     elif administratorAnswer == "no":
                         self.game.stop()
