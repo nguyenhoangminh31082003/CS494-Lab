@@ -194,3 +194,15 @@ class PlayerList:
         self.players[position].reset()
         self.countAlivePlayers += 1
         return self.countAlivePlayers
+    
+    def resetAllPlayers(self) -> None:
+        for player in self.players:
+            player.reset()
+        self.countAlivePlayers = len(self.players)
+
+    def requirePlayerWithNicknameToWait(self, nickname : str) -> None:
+        position = self.findPlayerPosition(nickname)
+        self.players[position].wait()
+
+    def areAllWaiting(self) -> bool:
+        return sum([player.isWaiting() for player in self.players]) == len(self.players)

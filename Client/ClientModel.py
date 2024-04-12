@@ -85,7 +85,7 @@ class ClientModel:
 
             response = self.receivedResponses.get()
 
-            print(f"!!![CLIENT] Returning response: {response.toString()}")
+            #print(f"!!![CLIENT] Returning response: {response.toString()}")
 
             return response 
         

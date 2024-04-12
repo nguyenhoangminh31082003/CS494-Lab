@@ -41,6 +41,9 @@ class ParticipantModel:
     def reset(self):
         self.score = 0
         self.mode = PlayerMode.PLAY
+
+    def wait(self):
+        self.mode = PlayerMode.WAIT
         
     def increaseScore(self, score : int):
         self.score += score

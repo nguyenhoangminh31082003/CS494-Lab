@@ -666,7 +666,7 @@ class GameGUI:
 
             self.bindSummaryUI()
 
-            print(f"[CLIENT] Received summary: {json.dumps(self.summary, indent = 4)}")
+            #print(f"[CLIENT] Received summary: {json.dumps(self.summary, indent = 4)}")
             
         elif statusCode == ResponseStatusCode.BROADCASTED_RANK:
             self.rankSummary = json.loads(content)
