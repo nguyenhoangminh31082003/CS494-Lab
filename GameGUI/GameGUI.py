@@ -62,7 +62,7 @@ class GameGUI:
             return False
         
         self.statistic.clear()
-        keyword = self.rankSummary["quiz_summary"]["current_keyword"]
+        keyword = self.rankSummary["quiz_summary"]["current_keyword"].upper()
         rankInformation = self.rankSummary['rank_summary']["ranks"]
         
         self.statisticScreenComponents['keyword'].changeTextContent(f"ANSWER: {keyword}")
@@ -128,21 +128,31 @@ class GameGUI:
                     TextBox(
                         textFont = AssetConstants.AMATICSC_FONT,
                         textColor = color,
-                        textSize = 16,
-                        textContent = player["nickname"],
+                        textSize = 12,
+                        textContent = str(player["order"]),
                         containerInfo = (
-                            self.screenWidth / 35, 
-                            self.screenHeight / 10 + (i + 1) * 30, 0, 0
+                            10, 
+                            self.screenHeight / 10 + 90 + (i + 1) * 30, 0, 0
                         )
                     ),
                     TextBox(
                         textFont = AssetConstants.AMATICSC_FONT,
                         textColor = color,
-                        textSize = 16,
+                        textSize = 12,
+                        textContent = player["nickname"],
+                        containerInfo = (
+                            self.screenWidth / 7 - 60, 
+                            self.screenHeight / 10 + 90 + (i + 1) * 30, 0, 0
+                        )
+                    ),
+                    TextBox(
+                        textFont = AssetConstants.AMATICSC_FONT,
+                        textColor = color,
+                        textSize = 12,
                         textContent = f": {player['points']}",
                         containerInfo = (
-                            self.screenWidth / 7, 
-                            self.screenHeight / 10 + (i + 1) * 30, 0, 0
+                            self.screenWidth / 7 + 20, 
+                            self.screenHeight / 10 + 90 + (i + 1) * 30, 0, 0
                         ),
                     )
                 )
@@ -241,7 +251,7 @@ class GameGUI:
         self.waitScreenComponents['notify'] = TextBox(
             textFont = AssetConstants.AMATICSC_FONT,
             textColor = ColorCodeTuples.GREEN,
-            textSize = 16,
+            textSize = 12,
             textContent = "1/5",
             containerInfo = (containerBoxContainer[0], containerBoxContainer[1] + containerBoxContainer[3] / 2 + self.screenHeight * 10 / 100, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100)
         )
@@ -266,7 +276,7 @@ class GameGUI:
         self.gameScreenComponents['hint'] = TextBox(
             textFont = AssetConstants.AMATICSC_FONT,
             textColor = ColorCodeTuples.WHITE,
-            textSize = 16,
+            textSize = 12,
             textContent = "hint",
             containerInfo = (containerBoxContainer[0], self.screenHeight * 2 / 10, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100),
         )
@@ -276,7 +286,7 @@ class GameGUI:
             textColor = ColorCodeTuples.WHITE,
             textSize = 20,
             textContent = "Players:",
-            containerInfo = (self.screenWidth / 10, self.screenHeight / 10, 0, 0),
+            containerInfo = (self.screenWidth / 10, self.screenHeight / 10 + 90, 0, 0),
             border = True
         )
         
@@ -514,7 +524,7 @@ class GameGUI:
     def displayMatchScreen(self):
         
         round = self.summary["round_count"] + 1
-        word = self.summary["quiz"]["current_keyword"]
+        word = self.summary["quiz"]["current_keyword"].upper()
         wordLength = len(word)
         hint = self.summary["quiz"]["hint"]
         order = self.summary['turn_count'] + 1
@@ -587,12 +597,15 @@ class GameGUI:
         for i, player in enumerate(playerInformation):
             self.scoreboard[i][0].drawLeftToRight(self.screen)
             self.scoreboard[i][1].drawLeftToRight(self.screen)
+            self.scoreboard[i][2].drawLeftToRight(self.screen)
             if player["nickname"] == currentPlayerNickname: 
                 self.scoreboard[i][0].changeColor(ColorCodeTuples.GREEN)
                 self.scoreboard[i][1].changeColor(ColorCodeTuples.GREEN)
+                self.scoreboard[i][2].changeColor(ColorCodeTuples.GREEN)
             if player['alive'] == False:
                 self.scoreboard[i][0].changeColor(ColorCodeTuples.RED)
                 self.scoreboard[i][1].changeColor(ColorCodeTuples.RED)
+                self.scoreboard[i][2].changeColor(ColorCodeTuples.RED)
         
         if self.keyword_textform.checkSelection():
             self.keyword_textform.draw(self.screen)
