@@ -29,11 +29,12 @@ class QuizList:
             wordCount = int(file.readline())
 
             for _ in range(wordCount):
-                line = file.readline()
-                position = line.find(":")
+                k = file.readline()
+                q = file.readline()
+                
                 self.quizzes.append(Quiz(
-                    question = line[(position + 1):],
-                    keyword = line[:position]
+                    question = q,
+                    keyword = k
                 ))
 
             random.shuffle(self.quizzes)

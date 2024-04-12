@@ -129,7 +129,7 @@ class GameGUI:
                         textFont = AssetConstants.AMATICSC_FONT,
                         textColor = color,
                         textSize = 12,
-                        textContent = str(player["order"]),
+                        textContent = str(player["order"] + 1),
                         containerInfo = (
                             10, 
                             self.screenHeight / 10 + 90 + (i + 1) * 30, 0, 0
@@ -276,7 +276,7 @@ class GameGUI:
         self.gameScreenComponents['hint'] = TextBox(
             textFont = AssetConstants.AMATICSC_FONT,
             textColor = ColorCodeTuples.WHITE,
-            textSize = 12,
+            textSize = 14,
             textContent = "hint",
             containerInfo = (containerBoxContainer[0], self.screenHeight * 2 / 10, containerBoxContainer[2], containerBoxContainer[3] * 15 / 100),
         )
@@ -507,8 +507,8 @@ class GameGUI:
                 self.running = False
                 pygame.quit()
                 return
-        self.waitScreenComponents['notify'].changeTextContent(f'{self.summary['client_count_summary']['successfully_registered_player_count']}/{self.summary['client_count_summary']['required_number_of_players']}')
         self.screen.blit(self.inGameImage, (0, 0))
+        self.waitScreenComponents['notify'].changeTextContent(f'{self.summary['client_count_summary']['successfully_registered_player_count']}/{self.summary['client_count_summary']['required_number_of_players']}')
         
         for element in self.waitScreenComponents.values():
             element.draw(self.screen)
