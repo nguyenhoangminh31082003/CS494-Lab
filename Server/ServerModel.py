@@ -113,8 +113,6 @@ class ServerModel:
         participantSocket.close()
         self.selector.unregister(participantSocket)
         content = str()
-        
-        #print("WHERE ARE YOU? BUGS!!!!!!!!!!!!!", participant.getMode())
 
         if participant.isWatcher():
             self.game.removeWatcher(participant)

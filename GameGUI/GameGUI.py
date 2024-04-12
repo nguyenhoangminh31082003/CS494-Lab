@@ -62,7 +62,7 @@ class GameGUI:
             return False
         
         self.statistic.clear()
-        keyword = self.rankSummary["quiz_summary"]["current_keyword"].upper()
+        keyword = self.rankSummary["quiz_summary"]["keyword"].upper()
         rankInformation = self.rankSummary['rank_summary']["ranks"]
         
         self.statisticScreenComponents['keyword'].changeTextContent(f"ANSWER: {keyword}")
