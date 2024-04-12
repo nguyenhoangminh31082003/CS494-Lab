@@ -1,9 +1,6 @@
 import sys
 import threading
 
-sys.path.append("./Server/")
-sys.path.append("./GameGUI/")
-
 from ClientModel import ClientModel
 from ServerModel import ServerModel
 from GameGUI import GameGUI

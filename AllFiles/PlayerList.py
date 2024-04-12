@@ -1,10 +1,7 @@
-import sys
 import random
 import json
-import os
-
 import sys
-sys.path.append("./Participants/")
+import os
 
 from ParticipantModel import ParticipantModel
 

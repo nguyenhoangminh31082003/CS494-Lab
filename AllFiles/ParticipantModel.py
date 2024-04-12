@@ -2,9 +2,6 @@ import re
 import sys
 import queue
 
-import sys
-sys.path.append("./Message/")
-
 from PlayerMode import PlayerMode
 from Response import Response
 

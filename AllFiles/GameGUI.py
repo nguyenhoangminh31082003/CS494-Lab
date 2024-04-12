@@ -4,9 +4,6 @@ import json
 import sys
 import os
 
-sys.path.append("./Client/")
-sys.path.append("./Message/")
-
 from ResponseStatusCode import ResponseStatusCode
 from ScreenViewID import ScreenViewID
 from ClientModel import ClientModel

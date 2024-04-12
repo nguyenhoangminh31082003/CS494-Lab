@@ -6,10 +6,6 @@ import time
 import sys
 import os
 
-sys.path.append("./Message/")
-sys.path.append("./Participants/")
-sys.path.append("./Game/")
-
 from Request import Request
 from Response import Response
 from GameModel import GameModel

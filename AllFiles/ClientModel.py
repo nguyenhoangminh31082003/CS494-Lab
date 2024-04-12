@@ -5,9 +5,6 @@ import json
 import sys
 import re
 
-sys.path.append("../")
-sys.path.append("./Message/")
-
 from Request import Request
 from Response import Response
 from RequestStatusCode import RequestStatusCode

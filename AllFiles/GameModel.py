@@ -4,10 +4,6 @@ import time
 import sys
 import os
 
-sys.path.append("./Quizzes/")
-sys.path.append("./Message/")
-sys.path.append("./Participants/")
-
 from Quiz import Quiz
 from QuizList import QuizList
 from Response import Response
